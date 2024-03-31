@@ -1,0 +1,20 @@
+contourpy @ file:///work/perseverance-python-buildout/croot/contourpy_1701756524386/work
+cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
+fonttools==4.25.0
+kiwisolver @ file:///work/perseverance-python-buildout/croot/kiwisolver_1698847502605/work
+matplotlib @ file:///work/perseverance-python-buildout/croot/matplotlib-suite_1698863180732/work
+munkres==1.1.4
+numpy @ file:///home/conda/feedstock_root/build_artifacts/numpy_1707225359967/work/dist/numpy-1.26.4-cp312-cp312-linux_x86_64.whl#sha256=031b7d6b2e5e604d9e21fc21be713ebf28ce133ec872dce6de006742d5e49bab
+packaging @ file:///croot/packaging_1710807400464/work
+pillow @ file:///croot/pillow_1707233021655/work
+ply @ file:///work/perseverance-python-buildout/croot/ply_1698846188635/work
+pyparsing @ file:///work/perseverance-python-buildout/croot/pyparsing_1698847881454/work
+PyQt5==5.15.10
+PyQt5-sip @ file:///work/perseverance-python-buildout/croot/pyqt-split_1698847927472/work/pyqt_sip
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+setuptools==69.2.0
+shapely @ file:///home/conda/feedstock_root/build_artifacts/shapely_1708367925731/work
+sip @ file:///work/perseverance-python-buildout/croot/sip_1698846977033/work
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+tornado @ file:///work/perseverance-python-buildout/croot/tornado_1698866362018/work
+wheel==0.43.0
