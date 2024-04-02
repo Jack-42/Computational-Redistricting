@@ -19,6 +19,14 @@ def dual_to_point(l: Line):
     return Point(l.slope, -y_intersect[0].y)
 
 
+def dual_to_lines(ps: list[Point]):
+    return list(map(dual_to_line, ps))
+
+
+def dual_to_points(ls: list[Line]):
+    return list(map(dual_to_point, ls))
+
+
 if __name__ == "__main__":
     p1 = Point(3, 4)
     print(dual_to_point(dual_to_line(p1)))
