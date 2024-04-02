@@ -37,8 +37,23 @@ class ColorPointSet:
         self.upper_y = upper_y
 
         self.x, self.y = self._get_sample_points()
-        # colors[i] = m indicates point (x[i], y[i]) is color m, m in [0, n_colors)
+        # colors[i] = m indicates point (x[i], y[i]) is color m, m in [0, n_colors
+        self.unique_colors = np.arange(self.n_colors)
         self.colors = self._get_point_colors()
+        self.color_sets = self._get_color_sets()
+
+    def _get_color_sets(self):
+        # colors_lists[i] = (x[j], y[j]) where color[j]=i
+        color_sets = {}
+        for color in self.unique_colors:
+            color_sets[color] = np.column_stack(
+                (
+                    self.x[self.colors == color],
+                    self.y[self.colors == color],
+                )
+            )
+        self.color_sets = color_sets
+        return color_sets
 
     def _get_sample_points(self) -> tuple[np.ndarray, np.ndarray]:
         if self.spatial_method == UNIFORM_RANDOM:
@@ -63,7 +78,7 @@ class ColorPointSet:
 
     def _random_colors(self) -> np.ndarray:
         colors = np.random.choice(
-            np.arange(self.n_colors), size=self.n_points, p=self.color_probs
+            self.unique_colors, size=self.n_points, p=self.color_probs
         )
         return colors
 
