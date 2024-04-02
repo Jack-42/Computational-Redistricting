@@ -6,9 +6,27 @@ Description: Methods for visualizing colored point sets
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
+from sympy import Line, Point
 
 
-def plot_points(point_set, save_path=None):
+def _save_show(show: bool, save_path):
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300)
+    if show:
+        plt.show()
+
+
+def plot_lines(lines: list[Line], show: bool = True, save_path=None):
+    # there's probably a better way to do this
+    for line in lines:
+        p1, p2 = line.points
+        x1, y1 = float(p1[0]), float(p1[1])
+        x2, y2 = float(p2[0]), float(p2[1])
+        plt.axline((x1, y1), (x2, y2))
+    _save_show(show, save_path)
+
+
+def plot_point_set(point_set, show: bool = True, save_path=None):
     cmap = list(mcolors.TABLEAU_COLORS.keys())
     if point_set.n_colors > len(cmap):
         raise NotImplementedError(
@@ -16,6 +34,4 @@ def plot_points(point_set, save_path=None):
         )
     colors = [cmap[c] for c in point_set.colors]
     plt.scatter(point_set.x, point_set.y, c=colors)
-    if save_path is not None:
-        plt.savefig(save_path, dpi=300)
-    plt.show()
+    _save_show(show, save_path)

@@ -10,7 +10,7 @@ import numpy as np
 
 from constants import *
 from point_set import ColorPointSet
-from visualization import plot_points
+from visualization import plot_point_set
 
 
 def list_of_floats(arg):
@@ -71,4 +71,4 @@ if __name__ == "__main__":
         args.n_colors,
         args.color_probs,
     )
-    plot_points(point_set, args.fig_save_path)
+    plot_point_set(point_set, save_path=args.fig_save_path)
