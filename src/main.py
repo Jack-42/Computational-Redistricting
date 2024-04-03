@@ -8,8 +8,8 @@ import argparse
 
 import numpy as np
 
-from constants import *
 from point_set import ColorPointSet
+from utils.constants import *
 from visualization import plot_point_set
 
 
