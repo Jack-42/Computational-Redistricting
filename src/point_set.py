@@ -8,6 +8,7 @@ Will sample and color the points according to the given parameters.
 import numpy as np
 
 from utils.constants import *
+from utils.utils import xy_to_points
 
 
 class ColorPointSet:
@@ -46,11 +47,8 @@ class ColorPointSet:
         # colors_lists[i] = (x[j], y[j]) where color[j]=i
         color_sets = {}
         for color in self.unique_colors:
-            color_sets[color] = np.column_stack(
-                (
-                    self.x[self.colors == color],
-                    self.y[self.colors == color],
-                )
+            color_sets[color] = xy_to_points(
+                self.x[self.colors == color], self.y[self.colors == color]
             )
         self.color_sets = color_sets
         return color_sets

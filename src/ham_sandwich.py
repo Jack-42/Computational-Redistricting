@@ -10,6 +10,8 @@ from typing import Optional
 import numpy as np
 from sympy import Line, Point
 
+from dual import dual_to_lines
+
 
 def weighted_2d_hs(
     point_set,
@@ -24,10 +26,13 @@ def weighted_2d_hs(
         raise NotImplementedError(
             f"Currently only support 2-color ham-sandwhich cuts, given {point_set.n_colors} colors"
         )
-
-    # convert points to their duals (lines)
-    T = []  # T[i] = set of lines for color i
+    # 1) convert points to their duals (lines)
     color_sets = point_set.color_sets
+    T = {
+        c: dual_to_lines(c_set) for c, c_set in color_sets.items()
+    }  # T[i] = set of lines for color i
+
+    # 2) pruning mechanism
 
 
 if __name__ == "__main__":
