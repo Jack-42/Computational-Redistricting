@@ -7,7 +7,7 @@ Will sample and color the points according to the given parameters.
 
 import numpy as np
 
-from constants import *
+from utils.constants import *
 
 
 class ColorPointSet:
