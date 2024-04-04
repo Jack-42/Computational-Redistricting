@@ -14,6 +14,12 @@ from dual import dual_to_lines
 from utils.constants import EPSILON
 
 
+def get_bisectors(ps: list[Point]):
+    # calculate the bisector for a given list of points
+    assert len(ps) % 2 == 1  # each bisector should be incident to one point in ps
+    # TODO
+
+
 def weighted_2d_hs(
     point_set,
     weights: Optional[np.ndarray[np.float64]] = None,
