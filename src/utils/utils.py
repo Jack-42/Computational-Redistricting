@@ -7,7 +7,12 @@ Description: Generic utilities
 from functools import cmp_to_key
 
 import numpy as np
-from sympy import Point
+from sympy import Line, Point
+
+
+def get_intersection(l1: Line, l2: Line):
+    # sympy has weird syntax for this
+    return l1.intersection(l2).args[0]
 
 
 def xy_to_points(x: np.ndarray, y: np.ndarray) -> list[Point]:

@@ -12,12 +12,41 @@ from sympy import Line, Point
 
 from dual import dual_to_lines
 from utils.constants import EPSILON
+from utils.utils import get_intersection
 
 
-def get_bisectors(ps: list[Point]):
-    # calculate the bisector for a given list of points
-    assert len(ps) % 2 == 1  # each bisector should be incident to one point in ps
-    # TODO
+def get_quadrant(l_i: Line, l_A: Line, l_B: Line) -> int:
+    """
+    Get the quadrant for a given line l_i. The possible quadrants are:
+    (1 = +, +, 2 = +, -, 3 = -, -, 4 = -, +), depending on
+    "whether the line l_i crosses l_A above or below C, and whether it crosses l_B above
+    or below C". C=intersection between l_A and l_B.
+    Note we don't want to use the x-axis for l_A or l_B as this will cause all lines to fall in
+    quadrants 1 and 2 (C.y=0=p_A.y=p_B.y).
+    """
+    assert l_A.slope != l_B.slope, "l_A and l_B cannot be parallel!"
+    assert abs(l_A.slope) > 0 and abs(l_B.slope) > 0
+    # should always be only exactly 1 point since l_A and l_B are not parallel
+    C = get_intersection(l_A, l_B)
+    p_A = get_intersection(l_i, l_A)
+    p_B = get_intersection(l_i, l_B)
+    # >= covers more extreme edge cases
+    if p_A.y >= C.y and p_B >= C.y:
+        return 1
+    elif p_A.y >= C.y and p_B < C.y:
+        return 2
+    elif p_A.y < C.y and p_B < C.y:
+        return 3
+    else:
+        return 4
+
+
+def find_partition(lines: list[Line]):
+    """
+    Construct a (1/4)-partition of the set of lines
+    """
+    # may want to use Las Vegas algo as suggested in: https://www.researchgate.net/publication/2851033_Optimization_in_Arrangements
+    pass
 
 
 def weighted_2d_hs(
@@ -49,8 +78,10 @@ def weighted_2d_hs(
     T = {
         c: dual_to_lines(c_set) for c, c_set in color_sets.items()
     }  # T[i] = set of lines for color i
-
-    # 2) pruning mechanism
+    # 2) find (1/4)-partition
+    # 3) calculate parity
+    # 4) pruning mechanism
+    # 5) recurse
 
 
 if __name__ == "__main__":
