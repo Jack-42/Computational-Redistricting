@@ -8,6 +8,7 @@ Implementation of ham-sandwhich algorithm, based on: https://link.springer.com/c
 from typing import Optional
 
 import numpy as np
+import sympy as sp
 from sympy import Line, Point
 
 from dual import dual_to_lines
@@ -41,11 +42,26 @@ def get_quadrant(l_i: Line, l_A: Line, l_B: Line) -> int:
         return 4
 
 
+def get_median_level(lines: list[Line]):
+    # TODO: implement this method, median level of arrangement
+    pass
+
+
 def find_partition(lines: list[Line]):
     """
     Construct a (1/4)-partition of the set of lines
     """
     # may want to use Las Vegas algo as suggested in: https://www.researchgate.net/publication/2851033_Optimization_in_Arrangements
+    line_slopes = [l.slope for l in lines]
+    mu = np.median(line_slopes)
+    L1 = [l for l in lines if l.slope <= mu]
+    L2 = [l for l in lines if l.slope > mu]
+    # the code below is subject to change, basically pseudocode rn
+    med_L1, med_L2 = get_median_level(L1), get_median_level(L2)
+    C = get_intersection(med_L1, med_L2)
+    # get lines incident to C with known slope
+    l_A = Line(C, slope=mu)
+    l_B = Line(C, slope=sp.oo)  # sp.oo = infinity -> vertical line
     pass
 
 
