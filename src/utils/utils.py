@@ -12,7 +12,12 @@ from sympy import Line, Point
 
 def get_intersection(l1: Line, l2: Line):
     # sympy has weird syntax for this
-    return l1.intersection(l2).args[0]
+    if l1.slope == l2.slope:
+        return None
+    intersections = l1.intersection(l2)
+    if isinstance(intersections, list):
+        return intersections[0]
+    return intersections.args[0]
 
 
 def xy_to_points(x: np.ndarray, y: np.ndarray) -> list[Point]:
