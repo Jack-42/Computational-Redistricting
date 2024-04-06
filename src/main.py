@@ -13,8 +13,8 @@ from utils.constants import *
 from visualization import plot_point_set
 
 
-def list_of_floats(arg):
-    return list(map(float, arg.split(",")))
+def list_of_int(arg):
+    return list(map(int, arg.split(",")))
 
 
 def parse_args():
@@ -23,11 +23,10 @@ def parse_args():
         description="Visualize points with given params",
     )
     parser.add_argument(
-        "--n_points",
-        type=int,
-        required=True,
+        "--points_per_color",
+        type=list_of_int,
         default=argparse.SUPPRESS,
-        help="number of points",
+        help="number of points to use for each color",
     )
     parser.add_argument(
         "--sample_method",
@@ -40,15 +39,6 @@ def parse_args():
         type=str,
         default=RANDOM,
         help="method for sampling color points",
-    )
-    parser.add_argument(
-        "--n_colors", type=int, default=2, help="number of colors to use"
-    )
-    parser.add_argument(
-        "--color_probs",
-        type=list_of_floats,
-        default=None,
-        help="probability of sampling each color",
     )
     parser.add_argument("--seed", type=int, default=42, help="random seed")
     parser.add_argument(
@@ -65,10 +55,8 @@ if __name__ == "__main__":
     args = parse_args()
     np.random.seed(args.seed)
     point_set = ColorPointSet(
-        args.n_points,
+        args.points_per_color,
         args.sample_method,
         args.color_method,
-        args.n_colors,
-        args.color_probs,
     )
     plot_point_set(point_set, save_path=args.fig_save_path)

@@ -14,24 +14,19 @@ from utils.utils import xy_to_points
 class ColorPointSet:
     def __init__(
         self,
-        n_points: int,
+        points_per_color: list[int],
         spatial_method: str,
         color_method: str,
-        n_colors=2,
-        color_probs=None,
         lower_x=0.0,
         upper_x=1.0,
         lower_y=0.0,
         upper_y=1.0,
     ) -> None:
-        if color_probs is None:
-            # give equal probability to each color
-            color_probs = [1.0 / n_colors] * n_colors
-        self.n_points = n_points
+        self.n_points = sum(points_per_color)
         self.spatial_method = spatial_method
         self.color_method = color_method
-        self.n_colors = n_colors
-        self.color_probs = color_probs
+        self.n_colors = len(points_per_color)
+        self.points_per_color = points_per_color
         self.lower_x = lower_x
         self.upper_x = upper_x
         self.lower_y = lower_y
@@ -75,10 +70,14 @@ class ColorPointSet:
         return x, y
 
     def _random_colors(self) -> np.ndarray:
-        colors = np.random.choice(
-            self.unique_colors, size=self.n_points, p=self.color_probs
-        )
-        return colors
+        # for random case this is overly complicated, but want code to be adapatable
+        # to other color-sampling techniques (e.g., based on location)
+        colors = []
+        for i, n in enumerate(self.points_per_color):
+            i_arr = [i] * n
+            colors.extend(i_arr)
+        colors = np.array(colors)
+        return np.array(colors)
 
     def __len__(self):
         return self.n_points
