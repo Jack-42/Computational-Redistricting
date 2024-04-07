@@ -13,7 +13,7 @@ from sympy import Line, Point
 
 from point_set import ColorPointSet
 from utils.dual import uw_dual_to_line
-from utils.utils import get_intersection
+from utils.geometry import get_intersection
 
 
 def get_line_y_intercepts(lines: list[Line]):

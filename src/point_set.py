@@ -8,7 +8,7 @@ Will sample and color the points according to the given parameters.
 import numpy as np
 
 from utils.constants import *
-from utils.utils import xy_to_points
+from utils.geometry import xy_to_points
 
 
 class ColorPointSet:

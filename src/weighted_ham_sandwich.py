@@ -14,7 +14,7 @@ from sympy import Line, Point
 
 from utils.constants import EPSILON
 from utils.dual import dual_to_lines
-from utils.utils import get_intersection
+from utils.geometry import get_intersection
 
 
 def get_quadrant(l_i: Line, l_A: Line, l_B: Line) -> int:
