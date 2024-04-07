@@ -11,8 +11,8 @@ from shapely import LineString
 from shapely import Point as ShapelyPoint
 from sympy import Line, Point
 
-from dual import uw_dual_to_line
 from point_set import ColorPointSet
+from utils.dual import uw_dual_to_line
 from utils.utils import get_intersection
 
 

@@ -12,8 +12,8 @@ import numpy as np
 import sympy as sp
 from sympy import Line, Point
 
-from dual import dual_to_lines
 from utils.constants import EPSILON
+from utils.dual import dual_to_lines
 from utils.utils import get_intersection
 
 
