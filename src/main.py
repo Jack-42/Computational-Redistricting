@@ -8,9 +8,10 @@ import argparse
 
 import numpy as np
 
+from ham_sandwich import get_ham_sandwich_cut
 from point_set import ColorPointSet
 from utils.constants import *
-from visualization import plot_point_set
+from visualization import plot_lines, plot_point_set
 
 
 def list_of_int(arg):
@@ -20,13 +21,20 @@ def list_of_int(arg):
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="main",
-        description="Visualize points with given params",
+        description="Visualize points/lines with given params",
     )
     parser.add_argument(
         "--points_per_color",
+        required=True,
         type=list_of_int,
         default=argparse.SUPPRESS,
         help="number of points to use for each color",
+    )
+    parser.add_argument(
+        "--algorithm",
+        type=str,
+        default=HAM_SANDWICH,
+        help="algorithm to visualize",
     )
     parser.add_argument(
         "--sample_method",
@@ -59,4 +67,9 @@ if __name__ == "__main__":
         args.sample_method,
         args.color_method,
     )
-    plot_point_set(point_set, save_path=args.fig_save_path)
+    if args.algorithm == HAM_SANDWICH:
+        cuts = get_ham_sandwich_cut(point_set)
+        plot_point_set(point_set, show=False)
+        plot_lines(cuts, save_path=args.fig_save_path)
+    else:
+        raise NotImplementedError(f"Given algorithm not implemented: {args.algorithm}")

@@ -6,6 +6,9 @@ Description: Contains constant values used throughout project
 
 import numpy as np
 
+# algorithm options
+HAM_SANDWICH = "ham_sandwich"
+
 # sampling methods
 UNIFORM_RANDOM = "uni_random"
 
