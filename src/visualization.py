@@ -16,13 +16,22 @@ def _save_show(show: bool, save_path):
         plt.show()
 
 
-def plot_lines(lines: list[Line], show: bool = True, save_path=None):
+def plot_lines(
+    lines: list[Line],
+    segments_only: bool = False,
+    show: bool = True,
+    save_path=None,
+    color: str = "gold",
+):
     # there's probably a better way to do this
     for line in lines:
         p1, p2 = line.points
         x1, y1 = float(p1[0]), float(p1[1])
         x2, y2 = float(p2[0]), float(p2[1])
-        plt.axline((x1, y1), (x2, y2))
+        if segments_only:
+            plt.plot([x1, x2], [y1, y2], color=color)
+        else:
+            plt.axline((x1, y1), (x2, y2), color=color)
     _save_show(show, save_path)
 
 

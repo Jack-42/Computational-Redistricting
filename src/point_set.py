@@ -6,6 +6,7 @@ Will sample and color the points according to the given parameters.
 """
 
 import numpy as np
+from sympy import Polygon
 
 from utils.constants import *
 from utils.geometry import xy_to_points
@@ -21,7 +22,12 @@ class ColorPointSet:
         upper_x=1.0,
         lower_y=0.0,
         upper_y=1.0,
+        color_sets=None,
+        defining_poly=None,
     ) -> None:
+        if color_sets is not None and defining_poly is not None:
+            self._alt_init(color_sets, defining_poly)
+            return
         self.n_points = sum(points_per_color)
         self.spatial_method = spatial_method
         self.color_method = color_method
@@ -37,6 +43,19 @@ class ColorPointSet:
         self.unique_colors = np.arange(self.n_colors)
         self.colors = self._get_point_colors()
         self.color_sets = self._get_color_sets()
+
+    def _alt_init(self, color_sets: dict, defining_poly: Polygon):
+        # don't need all attributes if using this initialization
+        self.color_sets = color_sets
+        self.n_colors = len(color_sets)
+        self.n_points = sum([len(c_set) for c_set in color_sets.values()])
+
+        # defining_poly contains all points, so can just these vertices to calculate bounds
+        vertices = defining_poly.vertices
+        self.lower_x = min(vertices, key=lambda p: p.x).x
+        self.upper_x = max(vertices, key=lambda p: p.x).x
+        self.lower_y = min(vertices, key=lambda p: p.y).y
+        self.upper_y = max(vertices, key=lambda p: p.y).y
 
     def _get_color_sets(self):
         # colors_lists[i] = (x[j], y[j]) where color[j]=i

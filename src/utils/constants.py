@@ -8,6 +8,7 @@ import numpy as np
 
 # algorithm options
 HAM_SANDWICH = "ham_sandwich"
+ITERATIVE_HAM_SANDWICH = "iterative_ham_sandwich"
 
 # sampling methods
 UNIFORM_RANDOM = "uni_random"

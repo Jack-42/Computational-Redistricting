@@ -9,6 +9,7 @@ import argparse
 import numpy as np
 
 from ham_sandwich import get_ham_sandwich_cut
+from iterative_ham import get_iterative_hs_cuts
 from point_set import ColorPointSet
 from utils.constants import *
 from visualization import plot_lines, plot_point_set
@@ -55,6 +56,12 @@ def parse_args():
         default=None,
         help="path to save figure to (optional)",
     )
+    parser.add_argument(
+        "--k",
+        type=int,
+        default=1,
+        help="number of iterations to perform with iterative ham-sandwich algorithm",
+    )
     args = parser.parse_args()
     return args
 
@@ -71,5 +78,9 @@ if __name__ == "__main__":
         cuts = get_ham_sandwich_cut(point_set)
         plot_point_set(point_set, show=False)
         plot_lines(cuts, save_path=args.fig_save_path)
+    elif args.algorithm == ITERATIVE_HAM_SANDWICH:
+        cuts, cut_segments = get_iterative_hs_cuts(point_set, args.k)
+        plot_point_set(point_set, show=False)
+        plot_lines(cuts, save_path=args.fig_save_path, segments_only=True)
     else:
         raise NotImplementedError(f"Given algorithm not implemented: {args.algorithm}")

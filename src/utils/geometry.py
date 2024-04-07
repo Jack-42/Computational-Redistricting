@@ -7,7 +7,7 @@ Description: Generic utilities
 from functools import cmp_to_key
 
 import numpy as np
-from sympy import Line, Point
+from sympy import Line, Point, Polygon
 
 
 def get_intersection(l1: Line, l2: Line):
@@ -18,6 +18,49 @@ def get_intersection(l1: Line, l2: Line):
     if isinstance(intersections, list):
         return intersections[0]
     return intersections.args[0]
+
+
+def get_polygon(ps: list[Point], already_sorted: bool = False) -> Polygon:
+    """
+    Get the polygon formed by a list of points
+    """
+    # when forming a Polygon with sympy points must be ordered
+    sorted_ps = ps
+    if not (already_sorted):
+        sorted_ps = sort_points_ccw(ps)
+    poly = Polygon(*sorted_ps)
+    return poly
+
+
+def get_points_inside(ps: list[Point], poly: Polygon) -> list[Point]:
+    """
+    Get the subset of ps which are inside poly
+    """
+    return [p for p in ps if poly.encloses_point(p)]
+
+
+def get_rectangular_region(
+    lower_x: float, upper_x: float, lower_y: float, upper_y: float
+) -> Polygon:
+    """
+    Get the rectangular region defined by the given lower and upper bounds.
+    """
+    # points must be in ccw order
+    points = [
+        Point(lower_x, lower_y),
+        Point(upper_x, lower_y),
+        Point(upper_x, upper_y),
+        Point(lower_x, upper_y),
+    ]
+    poly = get_polygon(points, already_sorted=True)
+    return poly
+
+
+def get_points_on_line(ps: list[Point], line: Line) -> list[Point]:
+    """
+    Get the subset of points on the given line
+    """
+    return [p for p in ps if line.contains(p)]
 
 
 def xy_to_points(x: np.ndarray, y: np.ndarray) -> list[Point]:
