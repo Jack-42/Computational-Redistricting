@@ -136,7 +136,6 @@ def get_iterative_hs_cuts(
                     next_point_sets.append(new_p_s_upper)
 
             cut_lines.append(hs_line)
-            # TODO: sometimes I1, I2 don't make sense (e.g., values outside original x/y bounds)
             cut_segments[i].append(Line(I1, I2))
         point_sets = next_point_sets
         point_set_polygons = next_point_set_polygons
