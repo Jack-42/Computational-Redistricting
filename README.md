@@ -30,4 +30,6 @@ options:
 ```
 
 ## TODO:
-* Algorithm for ham sandwich and weighted ham sandwich cuts
+* Debug issues with iterative ham sandwich
+* Sampling points from (maybe weighted?) Voronoi diagrams
+* (Optional) Switch code from using sympy to shapely - sympy is very slow
