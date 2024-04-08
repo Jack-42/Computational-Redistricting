@@ -6,13 +6,14 @@ Description: Entry-point for code
 
 import argparse
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from ham_sandwich import get_ham_sandwich_cut
 from iterative_ham import get_iterative_hs_cuts
 from point_set import ColorPointSet
 from utils.constants import *
-from visualization import plot_lines, plot_point_set
+from visualization import plot_k_cuts, plot_lines, plot_point_set
 
 
 def list_of_int(arg):
@@ -81,6 +82,11 @@ if __name__ == "__main__":
     elif args.algorithm == ITERATIVE_HAM_SANDWICH:
         cuts, cut_segments = get_iterative_hs_cuts(point_set, args.k)
         plot_point_set(point_set, show=False)
-        plot_lines(cuts, save_path=args.fig_save_path, segments_only=True)
+        plot_k_cuts(
+            cut_segments,
+            args.k,
+            save_path=args.fig_save_path,
+            segments_only=True,
+        )
     else:
         raise NotImplementedError(f"Given algorithm not implemented: {args.algorithm}")
