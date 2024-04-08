@@ -29,7 +29,8 @@ def _get_new_polygons(
     and the current_poly.
     """
     # each cut creates 2 new regions
-    new_points = current_poly.vertices + [I1, I2]
+    # (for god knows what reason) - current_poly.vertices returns a tuple if current_poly a triangle
+    new_points = list(current_poly.vertices) + [I1, I2]
     new_points = sort_points_ccw(new_points)
     # both new regions (polygons) will contain I1 and I2 - otherwise disjoint
     idx_1, idx_2 = new_points.index(I1), new_points.index(I2)
@@ -100,8 +101,9 @@ def get_iterative_hs_cuts(
     )
     point_set_polygons = [domain]
     cut_lines = []
-    cut_segments = []  # for visualization purposes
+    cut_segments = {}  # for visualization purposes
     for i in range(k):
+        cut_segments[i] = []
         next_point_sets = []
         next_point_set_polygons = []
         for p_s, poly in zip(point_sets, point_set_polygons):
@@ -135,7 +137,7 @@ def get_iterative_hs_cuts(
 
             cut_lines.append(hs_line)
             # TODO: sometimes I1, I2 don't make sense (e.g., values outside original x/y bounds)
-            cut_segments.append(Line(I1, I2))
+            cut_segments[i].append(Line(I1, I2))
         point_sets = next_point_sets
         point_set_polygons = next_point_set_polygons
     return cut_lines, cut_segments
