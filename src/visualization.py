@@ -24,7 +24,7 @@ def plot_lines(
     save_path=None,
     color: str = "r",
 ):
-    for l in range(lines):
+    for l in lines:
         x1, y1 = l.p1.x, l.p1.y
         x2, y2 = l.p2.x, l.p2.y
         plt.axline((x1, y1), (x2, y2), color=color)
@@ -65,12 +65,15 @@ def plot_k_cuts(
     _save_show(show, save_path)
 
 
-def plot_point_set(point_set, show: bool = True, save_path=None):
+def plot_point_set(point_set, show: bool = True, save_path=None, alpha_vals=None):
     cmap = list(mcolors.TABLEAU_COLORS.keys())
     if point_set.n_colors > len(cmap):
         raise NotImplementedError(
             f"Don't currently support visualizing more than {len(cmap)} colors"
         )
     colors = [cmap[c] for c in point_set.colors]
-    plt.scatter(point_set.x, point_set.y, c=colors)
+    # use opacity to mark special points (e.g., those on a cut-line)
+    if alpha_vals is None:
+        alpha_vals = [1] * len(colors)
+    plt.scatter(point_set.x, point_set.y, c=colors, alpha=alpha_vals)
     _save_show(show, save_path)
