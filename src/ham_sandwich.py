@@ -21,9 +21,7 @@ def get_line_y_intercepts(lines: list[Line]):
 
 def find_median_level(x: float, lines: list[Line]):
     y_vals = [line.y_int + (x * line.slope) for line in lines]
-    y_vals.sort()
-    med = (len(y_vals) + 1) // 2
-    return y_vals[med - 1]
+    return np.median(y_vals)
 
 
 def odd_intersection(interval, c1_duals, c2_duals):
@@ -92,8 +90,6 @@ def get_ham_sandwich_cut(point_set: ColorPointSet):
     min_interval_size = 1
     c1_points = point_set.color_sets[0]
     c2_points = point_set.color_sets[1]
-    assert len(c1_points) % 2 == 1, "Number of points for color 1 must be odd!"
-    assert len(c2_points) % 2 == 1, "Number of points for color 2 must be odd!"
 
     # get duals and y-intercepts of dual lines
     c1_duals = uw_dual_to_lines(c1_points)
