@@ -35,6 +35,7 @@ class Line:
             assert p1.x != p2.x
             self.p1 = p1
             self.p2 = p2
+            self.slope = (self.p2.y - self.p1.y) / (self.p2.x - self.p1.x)
         elif slope is not None and p1 is not None and p2 is None:
             self.p1 = p1
             self.slope = slope
@@ -94,7 +95,7 @@ def get_points_inside(ps: list[Point], poly: Polygon) -> list[Point]:
     """
     Get the subset of ps which are inside poly
     """
-    return [p for p in ps if poly.contains(p)]
+    return [p for p in ps if (poly.contains(p))]
 
 
 def get_rectangular_region(

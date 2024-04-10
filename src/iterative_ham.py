@@ -57,18 +57,22 @@ def _get_new_point_sets(
     upper_color_set = {}
     for c in point_set.color_sets:
         c_points = point_set.color_sets[c]
+        c_points_on_cut = get_points_on_line(c_points, cut)
         c_points_in_lower = get_points_inside(c_points, lower_poly)
         c_points_in_upper = get_points_inside(c_points, upper_poly)
-        n_lower, n_upper = len(c_points_in_lower), len(c_points_in_upper)
+        if c_points_on_cut[0] in c_points_in_lower:
+            c_points_in_lower.remove(c_points_on_cut[0])
+        if c_points_on_cut[0] in c_points_in_upper:
+            c_points_in_upper.remove(c_points_on_cut[0])
 
-        c_points_on_cut = get_points_on_line(c_points, cut)
+        n_lower, n_upper = len(c_points_in_lower), len(c_points_in_upper)
 
         # sanity-checks:
         # with current implementation, 1 point from each color should be on line
         # (with general position assumption and that the num. points for each color is odd)
         assert len(c_points_on_cut) == 1
-        assert n_lower == n_upper
-        assert n_lower + n_upper + 1 == len(c_points)
+        assert n_lower == n_upper, print(n_lower, n_upper)
+        assert n_lower + n_upper + 1 == len(c_points), print(n_lower, n_upper)
 
         # add point from cut if needed to maintain odd # of points for each color
         # TODO: causes issue later down the line when checking if point in polygon, need to fix
