@@ -6,10 +6,10 @@ Will sample and color the points according to the given parameters.
 """
 
 import numpy as np
-from sympy import Polygon
+from shapely import Polygon
 
 from utils.constants import *
-from utils.geometry import xy_to_points
+from utils.geometry import get_vertices, xy_to_points
 
 
 class ColorPointSet:
@@ -51,7 +51,7 @@ class ColorPointSet:
         self.n_points = sum([len(c_set) for c_set in color_sets.values()])
 
         # defining_poly contains all points, so can just these vertices to calculate bounds
-        vertices = defining_poly.vertices
+        vertices = get_vertices(defining_poly)
         self.lower_x = min(vertices, key=lambda p: p.x).x
         self.upper_x = max(vertices, key=lambda p: p.x).x
         self.lower_y = min(vertices, key=lambda p: p.y).y

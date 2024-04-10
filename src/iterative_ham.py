@@ -7,15 +7,18 @@ Algorithm for performing iterative ham-sandwich cuts
 
 import logging
 
-from sympy import Line, Point, Polygon
+from shapely import Point, Polygon
 
 from ham_sandwich import get_ham_sandwich_cut
 from point_set import ColorPointSet
 from utils.geometry import (
+    Line,
+    get_line_poly_intersection,
     get_points_inside,
     get_points_on_line,
     get_polygon,
     get_rectangular_region,
+    get_vertices,
     sort_points_ccw,
 )
 
@@ -29,8 +32,7 @@ def _get_new_polygons(
     and the current_poly.
     """
     # each cut creates 2 new regions
-    # (for god knows what reason) - current_poly.vertices returns a tuple if current_poly a triangle
-    new_points = list(current_poly.vertices) + [I1, I2]
+    new_points = get_vertices(current_poly) + [I1, I2]
     new_points = sort_points_ccw(new_points)
     # both new regions (polygons) will contain I1 and I2 - otherwise disjoint
     idx_1, idx_2 = new_points.index(I1), new_points.index(I2)
@@ -114,7 +116,7 @@ def get_iterative_hs_cuts(
                     f"Found {len(k_cuts)} cuts at iteration {i}, but will only use first cut!"
                 )
             hs_line = k_cuts[0]
-            I1, I2 = poly.intersection(hs_line)
+            I1, I2 = get_line_poly_intersection(hs_line, poly)
             if i < (k - 1):
                 # calculate new intersections and regions created by cut
                 lower_poly, upper_poly = _get_new_polygons(poly, I1, I2)
@@ -136,7 +138,7 @@ def get_iterative_hs_cuts(
                     next_point_sets.append(new_p_s_upper)
 
             cut_lines.append(hs_line)
-            cut_segments[i].append(Line(I1, I2))
+            cut_segments[i].append(Line(p1=I1, p2=I2))
         point_sets = next_point_sets
         point_set_polygons = next_point_set_polygons
     return cut_lines, cut_segments

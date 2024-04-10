@@ -9,12 +9,10 @@ import itertools
 from typing import Optional
 
 import numpy as np
-import sympy as sp
-from sympy import Line, Point
 
 from utils.constants import EPSILON
 from utils.dual import dual_to_lines
-from utils.geometry import get_intersection
+from utils.geometry import Line, get_line_intersection
 
 
 def get_quadrant(l_i: Line, l_A: Line, l_B: Line) -> int:
@@ -30,9 +28,9 @@ def get_quadrant(l_i: Line, l_A: Line, l_B: Line) -> int:
         return None
     assert abs(l_A.slope) > 0 and abs(l_B.slope) > 0
     # should always be only exactly 1 point since l_A and l_B are not parallel
-    C = get_intersection(l_A, l_B)
-    p_A = get_intersection(l_i, l_A)
-    p_B = get_intersection(l_i, l_B)
+    C = get_line_intersection(l_A, l_B)
+    p_A = get_line_intersection(l_i, l_A)
+    p_B = get_line_intersection(l_i, l_B)
     # >= covers more extreme edge cases
     if p_A.y >= C.y and p_B.y >= C.y:
         return 1
@@ -59,7 +57,7 @@ def get_alpha(lines: list[Line], l_A: Line, l_B: Line):
 
 
 def find_median_level(x: float, lines: list[Line], y_line: Line):
-    y_vals = [get_intersection(line, y_line) + (x * line.slope) for line in lines]
+    y_vals = [get_line_intersection(line, y_line) + (x * line.slope) for line in lines]
     y_vals.sort()
     med = np.floor((len(y_vals) + 1) / 2)
     return y_vals[med - 1]
@@ -99,17 +97,17 @@ def find_partition(lines: list[Line], weights: list[Line]):
             continue
         l_small, l_large = random.choice(L_smaller), random.choice(L_larger)
         C = get_intersection(l_small, l_large)
-        l_A_ = Line(C, slope=mu)
-        l_B_ = Line(C, slope=sp.oo)  # sp.oo = infinity -> vertical line
+        l_A_ = Line(p1=C, slope=mu)
+        l_B_ = Line(p1=C, slope=float('inf'))
         alpha = get_alpha(lines, l_A_, l_B_)
         if alpha >= 0.125:
             l_A = l_A_
             l_B = l_B_
     """
-    C = get_intersection(med_L1, med_L2)
+    C = get_line_intersection(med_L1, med_L2)
     # get lines incident to C with known slope
-    l_A = Line(C, slope=mu)
-    l_B = Line(C, slope=sp.oo)  # sp.oo = infinity -> vertical line
+    l_A = Line(p1=C, slope=mu)
+    l_B = Line(p1=C, slope=float("inf"))  # sp.oo = infinity -> vertical line
     return l_A, l_B
 
 
@@ -154,5 +152,9 @@ if __name__ == "__main__":
     from point_set import ColorPointSet
 
     np.random.seed(42)
-    point_set = ColorPointSet(10, "uni_random", "random", 2)
+    point_set = ColorPointSet(
+        [5, 5],
+        "uni_random",
+        "random",
+    )
     weighted_2d_hs(point_set, None)
