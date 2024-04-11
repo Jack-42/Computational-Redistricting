@@ -10,6 +10,8 @@ from typing import Union
 import numpy as np
 from shapely import LineString, Point, Polygon, intersection
 
+from utils.constants import *
+
 
 class Line:
     def __init__(
@@ -18,8 +20,6 @@ class Line:
         p2: Point = None,
         slope: float = None,
         y_int: float = None,
-        domain_lower_x: float = -1,
-        domain_upper_x: float = 1,
     ) -> None:
         self.p1 = None
         self.p2 = None
@@ -51,11 +51,19 @@ class Line:
             self.p2 = Point(p2_x, p2_y)
         if self.slope is None:
             self.slope = (self.p2.y - self.p1.y) / (self.p2.x - self.p1.x)
-        lower_y = self.slope * domain_lower_x + self.y_int
-        upper_y = self.slope * domain_upper_x + self.y_int
+
+        # need to cover entire domain for get_line_poly_intersection() to work
+        # noticed that domain_lower must be < 0 and domain_upper_x > 0 -> why?
+        domain_lower_x = -abs(LOWER_X) - 10
+        domain_upper_x = abs(UPPER_X) + 10
+        lower_y = self.slope * (domain_lower_x) + self.y_int
+        upper_y = self.slope * (domain_upper_x) + self.y_int
         self.lstring = LineString(
             [(domain_lower_x, lower_y), (domain_upper_x, upper_y)]
         )
+
+    def __str__(self):
+        return f"Line(slope={self.slope}, y_int={self.y_int})"
 
 
 def get_line_intersection(l1: Line, l2: Line) -> Union[None, Point]:

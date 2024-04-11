@@ -5,6 +5,7 @@ Description: Entry-point for code
 """
 
 import argparse
+import logging
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -71,22 +72,32 @@ if __name__ == "__main__":
     args = parse_args()
     np.random.seed(args.seed)
     point_set = ColorPointSet(
-        args.points_per_color,
-        args.sample_method,
-        args.color_method,
+        points_per_color=args.points_per_color,
+        spatial_method=args.sample_method,
+        color_method=args.color_method,
     )
     if args.algorithm == HAM_SANDWICH:
         cuts = get_ham_sandwich_cut(point_set)
         plot_point_set(point_set, show=False)
         plot_lines(cuts, save_path=args.fig_save_path)
     elif args.algorithm == ITERATIVE_HAM_SANDWICH:
-        cuts, cut_segments = get_iterative_hs_cuts(point_set, args.k)
-        plot_point_set(point_set, show=False)
-        plot_k_cuts(
-            cut_segments,
-            args.k,
-            save_path=args.fig_save_path,
-            segments_only=True,
+        cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(
+            point_set, args.k
         )
+        if not err:
+            special_indices = point_set.get_matching_indices(points_on_cuts)
+            plot_point_set(point_set, show=False, special_indices=special_indices)
+            plot_k_cuts(
+                cut_segments,
+                args.k,
+                save_path=args.fig_save_path,
+                segments_only=True,
+            )
+        else:
+            logging.error(
+                "An error occured, please check the message above and/or your input points"
+            )
+    elif args.algorithm == VISUALIZE_POINTS:
+        plot_point_set(point_set, save_path=args.fig_save_path)
     else:
         raise NotImplementedError(f"Given algorithm not implemented: {args.algorithm}")

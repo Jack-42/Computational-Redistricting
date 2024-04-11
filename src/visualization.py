@@ -61,11 +61,12 @@ def plot_k_cuts(
             else:
                 plt.axline((x1, y1), (x2, y2), color=colors[level], label=label)
     if labels is not None:
-        plt.legend(title="Cut Level")
+        plt.legend(title="Cut Level", bbox_to_anchor=(1, 0.5), loc="center left")
+        plt.tight_layout()
     _save_show(show, save_path)
 
 
-def plot_point_set(point_set, show: bool = True, save_path=None, alpha_vals=None):
+def plot_point_set(point_set, show: bool = True, save_path=None, special_indices=None):
     cmap = list(mcolors.TABLEAU_COLORS.keys())
     if point_set.n_colors > len(cmap):
         raise NotImplementedError(
@@ -73,7 +74,8 @@ def plot_point_set(point_set, show: bool = True, save_path=None, alpha_vals=None
         )
     colors = [cmap[c] for c in point_set.colors]
     # use opacity to mark special points (e.g., those on a cut-line)
-    if alpha_vals is None:
-        alpha_vals = [1] * len(colors)
+    alpha_vals = np.ones(len(colors))
+    if special_indices is not None and len(special_indices) > 0:
+        alpha_vals[special_indices] = 0.5
     plt.scatter(point_set.x, point_set.y, c=colors, alpha=alpha_vals)
     _save_show(show, save_path)

@@ -7,7 +7,7 @@ Based on the implementation here: https://github.com/anjali411/Ham-Sandwich-Cut/
 """
 
 import numpy as np
-from shapely import LineString, Point
+from shapely import LineString, MultiPoint, Point
 
 from point_set import ColorPointSet
 from utils.dual import uw_dual_to_lines
@@ -78,7 +78,11 @@ def median_intersection(interval, c1_duals, c2_duals):
     )
 
     ham_cut_points = c1_med_linestring.intersection(c2_med_linestring)
-    if isinstance(ham_cut_points, Point):
+    if isinstance(ham_cut_points, LineString):
+        ham_cut_points = list(ham_cut_points.coords)
+    elif isinstance(ham_cut_points, MultiPoint):
+        ham_cut_points = list(ham_cut_points.geoms)
+    elif isinstance(ham_cut_points, Point):
         ham_cut_points = [ham_cut_points]
     ham_cut_dual = uw_dual_to_lines(ham_cut_points)
     return ham_cut_dual
