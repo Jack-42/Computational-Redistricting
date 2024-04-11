@@ -9,6 +9,7 @@ import numpy as np
 # algorithm options
 HAM_SANDWICH = "ham_sandwich"
 ITERATIVE_HAM_SANDWICH = "iterative_ham_sandwich"
+VISUALIZE_POINTS = "visualize_points"
 
 # sampling methods
 UNIFORM_RANDOM = "uni_random"
@@ -18,3 +19,10 @@ RANDOM = "random"
 
 # math
 EPSILON = np.finfo(np.float64).eps
+
+# define domain
+# be careful that points are in general position for small domain if using random sampling
+LOWER_X = -10.0
+UPPER_X = 10.0
+LOWER_Y = -10.0
+UPPER_Y = 10.0

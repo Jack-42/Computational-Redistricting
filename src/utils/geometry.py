@@ -5,38 +5,105 @@ Description: Generic utilities
 """
 
 from functools import cmp_to_key
+from typing import Union
 
 import numpy as np
-from sympy import Line, Point, Polygon
+from shapely import LineString, Point, Polygon, intersection
+
+from utils.constants import *
 
 
-def get_intersection(l1: Line, l2: Line):
-    # sympy has weird syntax for this
-    if l1.slope == l2.slope:
+class Line:
+    def __init__(
+        self,
+        p1: Point = None,
+        p2: Point = None,
+        slope: float = None,
+        y_int: float = None,
+    ) -> None:
+        self.p1 = None
+        self.p2 = None
+        self.slope = None
+        self.y_int = None
+        if slope is not None and y_int is not None:
+            self.slope = slope
+            self.y_int = y_int
+        elif slope is not None and p1 is not None:
+            self.slope = slope
+            self.p1 = p1
+        elif p1 is not None and p2 is not None:
+            assert p1.x != p2.x
+            self.p1 = p1
+            self.p2 = p2
+            self.slope = (self.p2.y - self.p1.y) / (self.p2.x - self.p1.x)
+        elif slope is not None and p1 is not None and p2 is None:
+            self.p1 = p1
+            self.slope = slope
+        else:
+            raise ValueError("Invalid combination of arguments provided.")
+        if self.p1 is None:
+            self.p1 = Point(0, self.y_int)
+        if self.y_int is None:
+            self.y_int = self.p1.y - self.slope * self.p1.x
+        if self.p2 is None:
+            p2_x = self.p1.x + 1
+            p2_y = self.slope * p2_x + self.y_int
+            self.p2 = Point(p2_x, p2_y)
+        if self.slope is None:
+            self.slope = (self.p2.y - self.p1.y) / (self.p2.x - self.p1.x)
+
+        # need to cover entire domain for get_line_poly_intersection() to work
+        # noticed that domain_lower must be < 0 and domain_upper_x > 0 -> why?
+        domain_lower_x = -abs(LOWER_X) - 10
+        domain_upper_x = abs(UPPER_X) + 10
+        lower_y = self.slope * (domain_lower_x) + self.y_int
+        upper_y = self.slope * (domain_upper_x) + self.y_int
+        self.lstring = LineString(
+            [(domain_lower_x, lower_y), (domain_upper_x, upper_y)]
+        )
+
+    def __str__(self):
+        return f"Line(slope={self.slope}, y_int={self.y_int})"
+
+
+def get_line_intersection(l1: Line, l2: Line) -> Union[None, Point]:
+    if np.isclose(l1.slope, l2.slope):
+        # limitations of floating-point precision could cause incorrect results in extreme cases,
+        # but not a problem practically-speaking
         return None
-    intersections = l1.intersection(l2)
-    if isinstance(intersections, list):
-        return intersections[0]
-    return intersections.args[0]
+    x = (l2.y_int - l1.y_int) / (l1.slope - l2.slope)
+    y = l1.slope * x + l1.y_int
+    return Point(x, y)
+
+
+def get_line_poly_intersection(l: Line, poly: Polygon):
+    coords = intersection(poly, l.lstring).coords
+    return list(map(Point, coords))
 
 
 def get_polygon(ps: list[Point], already_sorted: bool = False) -> Polygon:
     """
     Get the polygon formed by a list of points
     """
-    # when forming a Polygon with sympy points must be ordered
+    # when forming a Polygon points must be ordered
     sorted_ps = ps
     if not (already_sorted):
         sorted_ps = sort_points_ccw(ps)
-    poly = Polygon(*sorted_ps)
+    poly = Polygon(sorted_ps)
     return poly
+
+
+def get_vertices(poly: Polygon) -> list[Point]:
+    # shapely includes initial point at both ends of the list
+    tup_coords = list(poly.exterior.coords)[:-1]
+    return list(map(Point, tup_coords))
 
 
 def get_points_inside(ps: list[Point], poly: Polygon) -> list[Point]:
     """
     Get the subset of ps which are inside poly
     """
-    return [p for p in ps if poly.encloses_point(p)]
+    return [p for p in ps if (poly.contains(p))]
 
 
 def get_rectangular_region(
@@ -56,11 +123,15 @@ def get_rectangular_region(
     return poly
 
 
+def _on_line(p: Point, line: Line):
+    return np.isclose((p.x * line.slope + line.y_int), p.y)
+
+
 def get_points_on_line(ps: list[Point], line: Line) -> list[Point]:
     """
     Get the subset of points on the given line
     """
-    return [p for p in ps if line.contains(p)]
+    return [p for p in ps if _on_line(p, line)]
 
 
 def xy_to_points(x: np.ndarray, y: np.ndarray) -> list[Point]:

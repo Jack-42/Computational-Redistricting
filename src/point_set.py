@@ -5,25 +5,23 @@ Description: Class for generating/storing points in a 2D region.
 Will sample and color the points according to the given parameters.
 """
 
+from typing import Optional
+
 import numpy as np
-from sympy import Polygon
+from shapely import Polygon
 
 from utils.constants import *
-from utils.geometry import xy_to_points
+from utils.geometry import get_vertices, xy_to_points
 
 
 class ColorPointSet:
     def __init__(
         self,
-        points_per_color: list[int],
-        spatial_method: str,
-        color_method: str,
-        lower_x=0.0,
-        upper_x=1.0,
-        lower_y=0.0,
-        upper_y=1.0,
-        color_sets=None,
-        defining_poly=None,
+        points_per_color: list[int] = None,
+        spatial_method: str = None,
+        color_method: str = None,
+        color_sets: Optional[dict] = None,
+        defining_poly: Optional[Polygon] = None,
     ) -> None:
         if color_sets is not None and defining_poly is not None:
             self._alt_init(color_sets, defining_poly)
@@ -33,10 +31,10 @@ class ColorPointSet:
         self.color_method = color_method
         self.n_colors = len(points_per_color)
         self.points_per_color = points_per_color
-        self.lower_x = lower_x
-        self.upper_x = upper_x
-        self.lower_y = lower_y
-        self.upper_y = upper_y
+        self.lower_x = LOWER_X
+        self.upper_x = UPPER_X
+        self.lower_y = LOWER_Y
+        self.upper_y = UPPER_Y
 
         self.x, self.y = self._get_sample_points()
         # colors[i] = m indicates point (x[i], y[i]) is color m, m in [0, n_colors
@@ -51,11 +49,22 @@ class ColorPointSet:
         self.n_points = sum([len(c_set) for c_set in color_sets.values()])
 
         # defining_poly contains all points, so can just these vertices to calculate bounds
-        vertices = defining_poly.vertices
+        vertices = get_vertices(defining_poly)
         self.lower_x = min(vertices, key=lambda p: p.x).x
         self.upper_x = max(vertices, key=lambda p: p.x).x
         self.lower_y = min(vertices, key=lambda p: p.y).y
         self.upper_y = max(vertices, key=lambda p: p.y).y
+
+    def get_matching_indices(self, query_ps: list) -> np.ndarray:
+        """
+        Used for helping visualize/set opacity of points on cut-line
+        """
+        indices = []
+        for p in query_ps:
+            for i, (x_val, y_val) in enumerate(zip(self.x, self.y)):
+                if np.isclose(p.x, x_val) and np.isclose(p.y, y_val):
+                    indices.append(i)
+        return np.array(indices)
 
     def _get_color_sets(self):
         # colors_lists[i] = (x[j], y[j]) where color[j]=i

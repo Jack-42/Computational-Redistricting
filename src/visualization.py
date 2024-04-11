@@ -7,7 +7,8 @@ Description: Methods for visualizing colored point sets
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
-from sympy import Line, Point
+
+from utils.geometry import Line
 
 
 def _save_show(show: bool, save_path):
@@ -23,10 +24,9 @@ def plot_lines(
     save_path=None,
     color: str = "r",
 ):
-    for i in range(len(lines)):
-        p1, p2 = lines[i].points
-        x1, y1 = float(p1[0]), float(p1[1])
-        x2, y2 = float(p2[0]), float(p2[1])
+    for l in lines:
+        x1, y1 = l.p1.x, l.p1.y
+        x2, y2 = l.p2.x, l.p2.y
         plt.axline((x1, y1), (x2, y2), color=color)
     _save_show(show, save_path)
 
@@ -49,9 +49,8 @@ def plot_k_cuts(
     for level in cut_lines.keys():
         first_l = True  # needed because matplotlib can't identify unique labels
         for line in cut_lines[level]:
-            p1, p2 = line.points
-            x1, y1 = float(p1[0]), float(p1[1])
-            x2, y2 = float(p2[0]), float(p2[1])
+            x1, y1 = line.p1.x, line.p1.y
+            x2, y2 = line.p2.x, line.p2.y
             if labels is not None and first_l:
                 label = labels[level]
                 first_l = False
@@ -62,16 +61,21 @@ def plot_k_cuts(
             else:
                 plt.axline((x1, y1), (x2, y2), color=colors[level], label=label)
     if labels is not None:
-        plt.legend(title="Cut Level")
+        plt.legend(title="Cut Level", bbox_to_anchor=(1, 0.5), loc="center left")
+        plt.tight_layout()
     _save_show(show, save_path)
 
 
-def plot_point_set(point_set, show: bool = True, save_path=None):
+def plot_point_set(point_set, show: bool = True, save_path=None, special_indices=None):
     cmap = list(mcolors.TABLEAU_COLORS.keys())
     if point_set.n_colors > len(cmap):
         raise NotImplementedError(
             f"Don't currently support visualizing more than {len(cmap)} colors"
         )
     colors = [cmap[c] for c in point_set.colors]
-    plt.scatter(point_set.x, point_set.y, c=colors)
+    # use opacity to mark special points (e.g., those on a cut-line)
+    alpha_vals = np.ones(len(colors))
+    if special_indices is not None and len(special_indices) > 0:
+        alpha_vals[special_indices] = 0.5
+    plt.scatter(point_set.x, point_set.y, c=colors, alpha=alpha_vals)
     _save_show(show, save_path)
