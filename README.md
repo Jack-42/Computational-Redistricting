@@ -9,8 +9,8 @@ Final project for CS506 - Computational Geometry
 ```
 (env) Computational-Redistricting/src$ python main.py -h
 usage: main [-h] --points_per_color POINTS_PER_COLOR [--algorithm ALGORITHM]
-            [--sample_method SAMPLE_METHOD] [--color_method COLOR_METHOD]
-            [--seed SEED] [--fig_save_path FIG_SAVE_PATH]
+            [--sample_method SAMPLE_METHOD] [--color_method COLOR_METHOD] [--seed SEED]
+            [--fig_save_path FIG_SAVE_PATH] [--show_fig] [--k K]
 
 Visualize points/lines with given params
 
@@ -27,9 +27,11 @@ options:
   --seed SEED           random seed
   --fig_save_path FIG_SAVE_PATH
                         path to save figure to (optional)
+  --show_fig            show figure if set
+  --k K                 number of iterations to perform with iterative ham-sandwich algorithm
 ```
 
 ## TODO:
-* Debug issues with iterative ham sandwich
-* Sampling points from (maybe weighted?) Voronoi diagrams
-* (Optional) Switch code from using sympy to shapely - sympy is very slow
+* Measure/plot timings for iterative hs-cuts for different values of n_points_per_color, k
+* (Option 1) Sampling points from (maybe weighted?) Voronoi diagrams
+* (Option 2) Try to simulate weighted ham-sandwich cuts by sampling additional points around existing points (integer weights >0)
