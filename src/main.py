@@ -59,6 +59,11 @@ def parse_args():
         help="path to save figure to (optional)",
     )
     parser.add_argument(
+        "--show_fig",
+        action="store_true",
+        help="show figure if set",
+    )
+    parser.add_argument(
         "--k",
         type=int,
         default=1,
@@ -79,7 +84,7 @@ if __name__ == "__main__":
     if args.algorithm == HAM_SANDWICH:
         cuts = get_ham_sandwich_cut(point_set)
         plot_point_set(point_set, show=False)
-        plot_lines(cuts, save_path=args.fig_save_path)
+        plot_lines(cuts, save_path=args.fig_save_path, show=args.show_fig)
     elif args.algorithm == ITERATIVE_HAM_SANDWICH:
         cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(
             point_set, args.k
@@ -92,6 +97,7 @@ if __name__ == "__main__":
                 args.k,
                 save_path=args.fig_save_path,
                 segments_only=True,
+                show=args.show_fig,
             )
         else:
             logging.error(
