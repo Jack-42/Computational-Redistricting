@@ -66,7 +66,13 @@ def plot_k_cuts(
     _save_show(show, save_path)
 
 
-def plot_point_set(point_set, show: bool = True, save_path=None, special_indices=None):
+def plot_point_set(
+    point_set,
+    show: bool = True,
+    save_path=None,
+    special_indices=None,
+    plot_bbox: bool = False,
+):
     cmap = list(mcolors.TABLEAU_COLORS.keys())
     if point_set.n_colors > len(cmap):
         raise NotImplementedError(
@@ -78,4 +84,14 @@ def plot_point_set(point_set, show: bool = True, save_path=None, special_indices
     if special_indices is not None and len(special_indices) > 0:
         alpha_vals[special_indices] = 0.5
     plt.scatter(point_set.x, point_set.y, c=colors, alpha=alpha_vals)
+    if plot_bbox:
+        plt.gca().add_patch(
+            plt.Rectangle(
+                (point_set.lower_x, point_set.lower_y),
+                point_set.upper_x - point_set.lower_x,
+                point_set.upper_y - point_set.lower_y,
+                edgecolor="black",
+                facecolor="none",
+            )
+        )
     _save_show(show, save_path)
