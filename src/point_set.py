@@ -20,28 +20,38 @@ class ColorPointSet:
         points_per_color: list[int] = None,
         spatial_method: str = None,
         color_method: str = None,
+        weights: np.ndarray = None,
+        spreads: np.ndarray = None,
         color_sets: Optional[dict] = None,
         defining_poly: Optional[Polygon] = None,
     ) -> None:
-        if color_sets is not None and defining_poly is not None:
-            self._alt_init(color_sets, defining_poly)
-            return
-        self.n_points = sum(points_per_color)
-        self.spatial_method = spatial_method
-        self.color_method = color_method
-        self.n_colors = len(points_per_color)
-        self.points_per_color = points_per_color
         self.lower_x = LOWER_X
         self.upper_x = UPPER_X
         self.lower_y = LOWER_Y
         self.upper_y = UPPER_Y
 
-        self.x, self.y = self._get_sample_points()
+        if color_sets is not None and defining_poly is not None:
+            self._alt_init(color_sets, defining_poly)
+            return
+        
+        self.n_points = sum(points_per_color)
+        self.spatial_method = spatial_method
+        self.color_method = color_method
+        self.n_colors = len(points_per_color)
+        self.points_per_color = points_per_color
+        
+        self.x, self.y = self._uniform_random()
         # colors[i] = m indicates point (x[i], y[i]) is color m, m in [0, n_colors
         self.unique_colors = np.arange(self.n_colors)
         self.colors = self._get_point_colors()
         self.color_sets = self._get_color_sets()
 
+        if self.spatial_method == CLUSTER:
+            self.weights = np.array(weights)
+            self.spreads = np.array(spreads)
+            self._cluster()
+
+        
     def _alt_init(self, color_sets: dict, defining_poly: Polygon):
         # don't need all attributes if using this initialization
         self.color_sets = color_sets
@@ -76,6 +86,7 @@ class ColorPointSet:
         self.color_sets = color_sets
         return color_sets
 
+
     def _get_sample_points(self) -> tuple[np.ndarray, np.ndarray]:
         if self.spatial_method == UNIFORM_RANDOM:
             return self._uniform_random()
@@ -91,11 +102,50 @@ class ColorPointSet:
             raise NotImplementedError(
                 f"Given color_method not supported: {self.color_method}"
             )
-
+    
     def _uniform_random(self) -> tuple[np.ndarray, np.ndarray]:
         x = np.random.uniform(self.lower_x, self.upper_x, self.n_points)
         y = np.random.uniform(self.lower_y, self.upper_y, self.n_points)
         return x, y
+    
+    def _cluster(self) -> tuple[np.ndarray, np.ndarray]:
+        sorting_indices = np.argsort(self.x)
+        print("Type of self.x:", type(self.x))
+        print("Type of self.weights:", type(self.weights))
+        print("Sorting indices:", sorting_indices)
+        print("Type of sorting_indices:", type(sorting_indices))        
+        x = self.x[sorting_indices]
+        y = self.y[sorting_indices]
+        w = self.weights[sorting_indices]
+        d = self.spreads[sorting_indices]
+        colors = self.colors[sorting_indices]
+
+        new_x = np.empty(np.sum(w))
+        new_y = np.empty(np.sum(w))
+        new_colors = np.empty(np.sum(w), dtype=int)
+
+        j = 0
+
+        for i, (xi, yi, wi, di) in enumerate(zip(x, y, w, d)):
+            for _ in range(wi):
+                r = di * np.sqrt(np.random.rand())
+                
+                theta = np.random.uniform(0, 2 * np.pi)
+                
+                x_new = xi + r * np.cos(theta)
+                y_new = yi + r * np.sin(theta)
+                
+                new_x[j] = x_new
+                new_y[j] = y_new
+                new_colors[j] = colors[i]
+
+                j += 1 
+
+        self.colors = np.append(self.colors, new_colors)
+        self.x = np.append(self.x, new_x)
+        self.y = np.append(self.y, new_y)
+        
+        return 
 
     def _random_colors(self) -> np.ndarray:
         # for random case this is overly complicated, but want code to be adapatable

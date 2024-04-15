@@ -12,6 +12,7 @@ import numpy as np
 
 from ham_sandwich import get_ham_sandwich_cut
 from iterative_ham import get_iterative_hs_cuts
+from voronoi import get_voronoi_sample
 from point_set import ColorPointSet
 from utils.constants import *
 from visualization import plot_k_cuts, plot_lines, plot_point_set
@@ -44,6 +45,18 @@ def parse_args():
         type=str,
         default=UNIFORM_RANDOM,
         help="method for sampling spatial points",
+    )
+    parser.add_argument(
+        "--weights",
+        type=list_of_int,
+        default=RANDOM_WEIGHT,
+        help="weights of points",
+    )
+    parser.add_argument(
+        "--spreads",
+        type=list_of_int,
+        default=RANDOM_WEIGHT,
+        help="spread of clusters",
     )
     parser.add_argument(
         "--color_method",
@@ -80,6 +93,8 @@ if __name__ == "__main__":
         points_per_color=args.points_per_color,
         spatial_method=args.sample_method,
         color_method=args.color_method,
+        weights=args.weights,
+        spreads=args.spreads
     )
     if args.algorithm == HAM_SANDWICH:
         cuts = get_ham_sandwich_cut(point_set)
@@ -105,5 +120,11 @@ if __name__ == "__main__":
             )
     elif args.algorithm == VISUALIZE_POINTS:
         plot_point_set(point_set, save_path=args.fig_save_path)
+    #elif args.algorithm == VORONOI_SAMPLING:
+        #(sampled_points, voronoi) = get_voronoi_sample(point_set)
+        #plot_point_set(sampled_points, show=False)
+        #plot_lines(voronoi, save_path=args.fig_save_path, show=args.show_fig)
+
+
     else:
         raise NotImplementedError(f"Given algorithm not implemented: {args.algorithm}")

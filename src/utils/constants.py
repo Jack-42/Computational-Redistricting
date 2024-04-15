@@ -10,12 +10,17 @@ import numpy as np
 HAM_SANDWICH = "ham_sandwich"
 ITERATIVE_HAM_SANDWICH = "iterative_ham_sandwich"
 VISUALIZE_POINTS = "visualize_points"
+VORONOI_SAMPLING = "voronoi_sampling"
 
 # sampling methods
 UNIFORM_RANDOM = "uni_random"
+CLUSTER = "cluster"
 
 # color sampling methods
 RANDOM = "random"
+
+# weighting
+RANDOM_WEIGHT = [1]
 
 # math
 EPSILON = np.finfo(np.float64).eps
@@ -26,3 +31,6 @@ LOWER_X = -10.0
 UPPER_X = 10.0
 LOWER_Y = -10.0
 UPPER_Y = 10.0
+
+# perturb amount
+PERTURB_MAX = .0001
