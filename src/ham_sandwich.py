@@ -6,6 +6,8 @@ Implementation of (unweighted) ham-sandwich algo in 2D.
 Based on the implementation here: https://github.com/anjali411/Ham-Sandwich-Cut/blob/master/hamSandwichCut.py
 """
 
+import logging
+
 import numpy as np
 from shapely import LineString, MultiPoint, Point
 
@@ -46,7 +48,11 @@ def get_intersections(interval, duals):
         for j in range(len(duals)):
             if i < j:
                 intersection_ = get_line_intersection(duals[i], duals[j])
-                if intersection_.x == np.inf:
+                if intersection_ is None:
+                    logging.warn(
+                        f"Dual-lines {i} and {j} are parallel - results may be incorrect. Check that points are in general position."
+                    )
+                elif intersection_.x == np.inf:
                     pass
                 elif interval[0] < intersection_.x and interval[1] > intersection_.x:
                     intersections.append(intersection_)
