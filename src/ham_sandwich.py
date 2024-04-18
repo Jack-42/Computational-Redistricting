@@ -22,7 +22,7 @@ def get_line_y_intercepts(lines: list[Line]):
 
 
 def find_median_level(x: float, lines: list[Line]):
-    y_vals = [line.y_int + (x * line.slope) for line in lines]
+    y_vals = [line.get_y(x) for line in lines]
     return np.median(y_vals)
 
 
@@ -36,10 +36,8 @@ def odd_intersection(interval, c1_duals, c2_duals):
     rm_c1 = find_median_level(right, c1_duals)
     rm_c2 = find_median_level(right, c2_duals)
 
-    v1 = lm_c1 - lm_c2
-    v2 = rm_c1 - rm_c2
-    # cross product - if negative then v1 and v2 point in opposite directions
-    return v1 * v2 < 0
+    # see Remark (3.1) of https://www.cs.jhu.edu/~misha/Spring16/Lo94.pdf
+    return (lm_c1 - lm_c2) * (rm_c1 - rm_c2) < 0
 
 
 def get_intersections(interval, duals):
@@ -106,10 +104,9 @@ def get_ham_sandwich_cut(point_set: ColorPointSet):
     c2_duals = uw_dual_to_lines(c2_points)
 
     # get initial interval for binary search
-    # ival arbitrary here, just want large interval relative to lower_x and higher_x
-    i = max(abs(point_set.lower_x), abs(point_set.upper_x))
-    ival = (i + 10) ** 2
-    interval = (point_set.lower_x - ival, point_set.upper_x + ival)
+    # theoretically should be (-inf, +inf), but very large values work for most cases
+    interval = (-1e11, 1e11)
+
     # binary search
     while (interval[1] - interval[0]) > min_interval_size:
         mid = float((interval[0] + interval[1]) / 2.0)

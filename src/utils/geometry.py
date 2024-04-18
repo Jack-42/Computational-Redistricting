@@ -62,6 +62,9 @@ class Line:
             [(domain_lower_x, lower_y), (domain_upper_x, upper_y)]
         )
 
+    def get_y(self, x: float):
+        return self.y_int + (x * self.slope)
+
     def __str__(self):
         return f"Line(slope={self.slope}, y_int={self.y_int})"
 
