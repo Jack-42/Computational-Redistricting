@@ -21,6 +21,9 @@ from visualization import plot_k_cuts, plot_lines, plot_point_set
 def list_of_int(arg):
     return list(map(int, arg.split(",")))
 
+def list_of_float(arg):
+    return list(map(float, arg.split(",")))
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -54,7 +57,7 @@ def parse_args():
     )
     parser.add_argument(
         "--spreads",
-        type=list_of_int,
+        type=list_of_float,
         default=RANDOM_WEIGHT,
         help="spread of clusters",
     )

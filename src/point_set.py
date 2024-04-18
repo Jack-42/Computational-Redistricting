@@ -109,11 +109,7 @@ class ColorPointSet:
         return x, y
     
     def _cluster(self) -> tuple[np.ndarray, np.ndarray]:
-        sorting_indices = np.argsort(self.x)
-        print("Type of self.x:", type(self.x))
-        print("Type of self.weights:", type(self.weights))
-        print("Sorting indices:", sorting_indices)
-        print("Type of sorting_indices:", type(sorting_indices))        
+        sorting_indices = np.argsort(self.x)     
         x = self.x[sorting_indices]
         y = self.y[sorting_indices]
         w = self.weights[sorting_indices]
