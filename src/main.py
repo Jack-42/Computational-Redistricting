@@ -96,7 +96,7 @@ if __name__ == "__main__":
         points_per_color=args.points_per_color,
         spatial_method=args.sample_method,
         color_method=args.color_method,
-        weights=args.weights,
+        weights=[x - 1 for x in args.weights],
         spreads=args.spreads
     )
     if args.algorithm == HAM_SANDWICH:

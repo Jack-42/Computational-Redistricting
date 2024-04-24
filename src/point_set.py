@@ -140,6 +140,7 @@ class ColorPointSet:
         self.colors = np.append(self.colors, new_colors)
         self.x = np.append(self.x, new_x)
         self.y = np.append(self.y, new_y)
+        self.color_sets = self._get_color_sets()
         
         return 
 
