@@ -49,11 +49,9 @@ class ColorPointSet:
         self.color_sets = self._get_color_sets()
         if weighting_method is not None and weighting_method == BIASED_WEIGHT:
             n_regions = 2**k
-            print("n_regions:", n_regions)
             self.weights = get_biased_weights_random(
                 self.colors, points_per_color, n_regions
             )
-            print(self.weights)
             if spreads is None:
                 # assume even spread
                 spreads = [0.01] * len(self.weights)
