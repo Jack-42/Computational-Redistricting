@@ -33,4 +33,4 @@ LOWER_Y = -10.0
 UPPER_Y = 10.0
 
 # perturb amount
-PERTURB_MAX = .0001
+PERTURB_MAX = 0.0001

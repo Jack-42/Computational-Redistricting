@@ -72,6 +72,7 @@ def plot_point_set(
     save_path=None,
     special_indices=None,
     plot_bbox: bool = False,
+    hide_ticks: bool = False,
 ):
     cmap = list(mcolors.TABLEAU_COLORS.keys())
     if point_set.n_colors > len(cmap):
@@ -93,5 +94,12 @@ def plot_point_set(
                 edgecolor="black",
                 facecolor="none",
             )
+        )
+        # remove original frame
+        for pos in ["right", "top", "bottom", "left"]:
+            plt.gca().spines[pos].set_visible(False)
+    if hide_ticks:
+        plt.tick_params(
+            left=False, right=False, labelleft=False, labelbottom=False, bottom=False
         )
     _save_show(show, save_path)
