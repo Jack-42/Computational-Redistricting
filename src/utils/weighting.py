@@ -40,6 +40,5 @@ def get_biased_weights_random(
     # isolate selected majority points
     # could make weight total_points to gurantee isolation as well, but given
     # our workaround implementation of weighted cuts want to avoid excess weight
-    original_majority_ppr = points_per_color[majority_color] // n_regions
-    weights[chosen_indices] = original_majority_ppr
+    weights[chosen_indices] = points_per_color[majority_color]
     return weights
