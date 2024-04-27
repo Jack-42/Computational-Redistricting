@@ -48,19 +48,13 @@ def parse_args():
         "--sample_method",
         type=str,
         default=UNIFORM_RANDOM,
-        help="method for sampling spatial points",
+        help=f"method for sampling spatial points, choose from: {UNIFORM_RANDOM}",
     )
     parser.add_argument(
-        "--weights",
-        type=list_of_int,
-        default=RANDOM_WEIGHT,
-        help="weights of points",
-    )
-    parser.add_argument(
-        "--spreads",
-        type=list_of_float,
-        default=RANDOM_WEIGHT,
-        help="spread of clusters",
+        "--weight_method",
+        type=str,
+        default=UNIFORM_WEIGHT,
+        help=f"how to weight points, choose from: {UNIFORM_WEIGHT, BIASED_WEIGHT}",
     )
     parser.add_argument(
         "--color_method",
@@ -97,8 +91,8 @@ if __name__ == "__main__":
         points_per_color=args.points_per_color,
         spatial_method=args.sample_method,
         color_method=args.color_method,
-        weights=[x - 1 for x in args.weights],
-        spreads=args.spreads,
+        weighting_method=args.weight_method,
+        k=args.k,
     )
     if args.algorithm == HAM_SANDWICH:
         cuts = get_ham_sandwich_cut(point_set)

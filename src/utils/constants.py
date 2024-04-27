@@ -14,13 +14,13 @@ VORONOI_SAMPLING = "voronoi_sampling"
 
 # sampling methods
 UNIFORM_RANDOM = "uni_random"
-CLUSTER = "cluster"
 
 # color sampling methods
 RANDOM = "random"
 
 # weighting
-RANDOM_WEIGHT = [1]
+UNIFORM_WEIGHT = "uni_weight"
+BIASED_WEIGHT = "bias_weight"
 
 # math
 EPSILON = np.finfo(np.float64).eps
