@@ -56,7 +56,7 @@ class ColorPointSet:
             print(self.weights)
             if spreads is None:
                 # assume even spread
-                spreads = [PERTURB_MAX] * len(self.weights)
+                spreads = [0.01] * len(self.weights)
             self.spreads = np.array(spreads)
             self._cluster()
 
@@ -119,7 +119,7 @@ class ColorPointSet:
         sorting_indices = np.argsort(self.x)
         x = self.x[sorting_indices]
         y = self.y[sorting_indices]
-        w = self.weights[sorting_indices]
+        w = self.weights[sorting_indices] - 1  # -1 to not double-count original point
         d = self.spreads[sorting_indices]
         colors = self.colors[sorting_indices]
 
@@ -130,7 +130,7 @@ class ColorPointSet:
         j = 0
 
         for i, (xi, yi, wi, di) in enumerate(zip(x, y, w, d)):
-            for _ in range(wi - 1):  # -1 to not double-count original point
+            for _ in range(wi):
                 r = di * np.sqrt(np.random.rand())
 
                 theta = np.random.uniform(0, 2 * np.pi)
@@ -147,9 +147,12 @@ class ColorPointSet:
         self.colors = np.append(self.colors, new_colors)
         self.x = np.append(self.x, new_x)
         self.y = np.append(self.y, new_y)
+        self.n_points = len(x)
+        unique, counts = np.unique(self.colors, return_counts=True)
+        self.points_per_color = np.zeros(len(unique))
+        for u, c in zip(unique, counts):
+            self.points_per_color[u] = c
         self.color_sets = self._get_color_sets()
-
-        return
 
     def _random_colors(self) -> np.ndarray:
         # for random case this is overly complicated, but want code to be adapatable

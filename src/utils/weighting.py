@@ -24,15 +24,18 @@ def get_biased_weights_random(
         # no need to bias
         return weights
     # apply higher weighting to majority color points completely at random
-    print(colors)
-    print(majority_color)
     majority_indices = np.nonzero(colors == majority_color)[0]
-    print(majority_indices)
     # want to isolate subset of majority points
     total_points = points_per_color[minority_color] + points_per_color[majority_color]
     n_points_to_choose = n_regions * points_per_color[minority_color] // total_points
-    print(n_regions, n_points_to_choose)
-    chosen_indices = np.random.choice(majority_indices, size=n_points_to_choose)
+    safety = (
+        n_regions + 1
+    )  # weighted points like to lie on the cut-lines - try to force some of them off
+    n_points_to_choose = n_points_to_choose + safety
+    n_points_to_choose = min(points_per_color[majority_color], n_points_to_choose)
+    chosen_indices = np.random.choice(
+        majority_indices, size=n_points_to_choose, replace=False
+    )
 
     # isolate selected majority points
     # could make weight total_points to gurantee isolation as well, but given
