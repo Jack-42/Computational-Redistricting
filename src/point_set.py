@@ -114,19 +114,17 @@ class ColorPointSet:
         return x, y
 
     def _cluster(self) -> tuple[np.ndarray, np.ndarray]:
-        sorting_indices = np.argsort(self.x)
-        x = self.x[sorting_indices]
-        y = self.y[sorting_indices]
-        w = self.weights[sorting_indices] - 1  # -1 to not double-count original point
-        d = self.spreads[sorting_indices]
-        colors = self.colors[sorting_indices]
+        x = self.x
+        y = self.y
+        w = self.weights - 1  # -1 to not double-count original point
+        d = self.spreads
+        colors = self.colors
 
         new_x = np.empty(np.sum(w))
         new_y = np.empty(np.sum(w))
         new_colors = np.empty(np.sum(w), dtype=int)
 
         j = 0
-
         for i, (xi, yi, wi, di) in enumerate(zip(x, y, w, d)):
             for _ in range(wi):
                 r = di * np.sqrt(np.random.rand())
