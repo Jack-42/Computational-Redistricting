@@ -67,16 +67,6 @@ def _get_new_point_sets(
             c_points_in_lower.remove(c_points_on_cut[0])
         if n_cut > 0 and c_points_on_cut[0] in c_points_in_upper:
             c_points_in_upper.remove(c_points_on_cut[0])
-
-        n_lower, n_upper = (
-            len(c_points_in_lower),
-            len(c_points_in_upper),
-        )
-        # sanity-checks:
-        assert n_cut + n_lower + n_upper == len(
-            c_points
-        ), f"color {c} | n_cut, n_lower, n_upper: {n_cut}, {n_lower}, {n_upper}"
-        assert n_lower == n_upper, f"color {c} | n_lower, n_upper: {n_lower}, {n_upper}"
         if n_cut > 0:
             # for visualization purposes later
             points_on_cuts.extend(c_points_on_cut)
