@@ -25,6 +25,7 @@ class ColorPointSet:
         k: int = 1,
         spreads: np.ndarray = None,
         color_sets: Optional[dict] = None,
+        is_weight: Optional[np.ndarray] = None,
         defining_poly: Optional[Polygon] = None,
     ) -> None:
         self.lower_x = LOWER_X
@@ -33,7 +34,7 @@ class ColorPointSet:
         self.upper_y = UPPER_Y
 
         if color_sets is not None and defining_poly is not None:
-            self._alt_init(color_sets, defining_poly)
+            self._alt_init(color_sets, defining_poly, is_weight)
             return
 
         self.n_points = sum(points_per_color)
@@ -43,7 +44,10 @@ class ColorPointSet:
         self.points_per_color = points_per_color
 
         self.x, self.y = self._uniform_random()
-        # colors[i] = m indicates point (x[i], y[i]) is color m, m in [0, n_colors
+        self.is_weight = np.zeros(
+            len(self.x), dtype="bool"
+        )  # is_weight[i] == if point i is just a "weight"
+        # colors[i] = m indicates point (x[i], y[i]) is color m, m in [0, n_colors]
         self.unique_colors = np.arange(self.n_colors)
         self.colors = self._get_point_colors()
         self.color_sets = self._get_color_sets()
@@ -60,11 +64,14 @@ class ColorPointSet:
             # TODO:
             raise NotImplementedError()
 
-    def _alt_init(self, color_sets: dict, defining_poly: Polygon):
+    def _alt_init(
+        self, color_sets: dict, defining_poly: Polygon, is_weight: np.ndarray
+    ):
         # don't need all attributes if using this initialization
         self.color_sets = color_sets
         self.n_colors = len(color_sets)
         self.n_points = sum([len(c_set) for c_set in color_sets.values()])
+        self.is_weight = is_weight
 
         # defining_poly contains all points, so can just these vertices to calculate bounds
         vertices = get_vertices(defining_poly)
@@ -142,6 +149,8 @@ class ColorPointSet:
 
                 j += 1
 
+        new_is_weight = np.ones(len(new_colors), dtype="bool")
+        self.is_weight = np.append(self.is_weight, new_is_weight)
         self.colors = np.append(self.colors, new_colors)
         self.x = np.append(self.x, new_x)
         self.y = np.append(self.y, new_y)

@@ -73,18 +73,24 @@ def plot_point_set(
     special_indices=None,
     plot_bbox: bool = False,
     hide_ticks: bool = False,
+    hide_weighted_pts: bool = False,
 ):
     cmap = list(mcolors.TABLEAU_COLORS.keys())
     if point_set.n_colors > len(cmap):
         raise NotImplementedError(
             f"Don't currently support visualizing more than {len(cmap)} colors"
         )
-    colors = [cmap[c] for c in point_set.colors]
+    colors = np.array([cmap[c] for c in point_set.colors])
     # use opacity to mark special points (e.g., those on a cut-line)
     alpha_vals = np.ones(len(colors))
     if special_indices is not None and len(special_indices) > 0:
         alpha_vals[special_indices] = 0.5
-    plt.scatter(point_set.x, point_set.y, c=colors, alpha=alpha_vals)
+    pts_x, pts_y = point_set.x, point_set.y
+    if hide_weighted_pts:
+        pts_x, pts_y = pts_x[~point_set.is_weight], pts_y[~point_set.is_weight]
+        colors = colors[~point_set.is_weight]
+        alpha_vals = alpha_vals[~point_set.is_weight]
+    plt.scatter(pts_x, pts_y, c=colors, alpha=alpha_vals)
     if plot_bbox:
         plt.gca().add_patch(
             plt.Rectangle(
