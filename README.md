@@ -33,5 +33,14 @@ options:
 
 ## TODO:
 * Measure/plot timings for iterative hs-cuts for different values of n_points_per_color, k
-* (Option 1) Sampling points from (maybe weighted?) Voronoi diagrams
-* (Option 2) Try to simulate weighted ham-sandwich cuts by sampling additional points around existing points (integer weights >0)
+  * In particular need to repeat experiments using different seeds - 10 repetitions for each experiment seems reasonable
+* Add code to calculate district majorities after RHSC
+  * Fairly straightforward for unweighted case
+  * For weighted case probably need some kind of flag saying if a point is an actual point or just part of weighting scheme
+  * Then can run experiments to measure how well weighting scheme actually works (rather than having to eyeball everything)
+* (Optional) Adapt cluster method to (very roughly) simulate population regions
+  * Basically each point is a population site - give small points_per_color
+  * Could say the site color is the majority - randomly sample between [0.51, 1.0] by how much they're a majority
+  * Can adapt _cluster() method in `point_set.py` to achieve this
+  * Could probably sample spreads and population counts (ie weights) from a gaussian
+  * See how this impacts cuts/methods compared to uniform random?
