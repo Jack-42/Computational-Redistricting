@@ -52,11 +52,13 @@ class ColorPointSet:
             self.weights = get_biased_weights_random(
                 self.colors, points_per_color, n_regions
             )
-            if spreads is None:
-                # assume even spread
-                spreads = [0.01] * len(self.weights)
+            # even spread
+            spreads = [0.01] * len(self.weights)
             self.spreads = np.array(spreads)
             self._cluster()
+        elif weighting_method is not None and weighting_method == POPULATION_WEIGHT:
+            # TODO:
+            raise NotImplementedError()
 
     def _alt_init(self, color_sets: dict, defining_poly: Polygon):
         # don't need all attributes if using this initialization

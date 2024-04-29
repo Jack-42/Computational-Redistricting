@@ -19,8 +19,9 @@ UNIFORM_RANDOM = "uni_random"
 RANDOM = "random"
 
 # weighting
-UNIFORM_WEIGHT = "uni_weight"
-BIASED_WEIGHT = "bias_weight"
+UNIFORM_WEIGHT = "uni_weight"  # all weights the same
+BIASED_WEIGHT = "bias_weight"  # bias weights to try to make regions more "fair"
+POPULATION_WEIGHT = "population_weight"  # treat given points as population centers and sample around them
 
 # math
 EPSILON = np.finfo(np.float64).eps
