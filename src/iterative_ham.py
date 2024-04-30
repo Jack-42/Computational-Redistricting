@@ -102,7 +102,7 @@ def _sanity_check_kth_cut(k_cuts: list, p_s: ColorPointSet, i: int) -> bool:
 
 
 def get_iterative_hs_cuts(
-    point_set: ColorPointSet, k: int
+    point_set: ColorPointSet, k: int, calculate_final_regions: bool
 ) -> tuple[list[Line], list[Line]]:
     """
     Perform k-rounds of ham-sandwich cuts
@@ -135,7 +135,7 @@ def get_iterative_hs_cuts(
                 break
             hs_line = k_cuts[0]
             I1, I2 = get_line_poly_intersection(hs_line, poly)
-            if i < (k - 1):
+            if i < (k - 1) or calculate_final_regions:
                 # calculate new intersections and regions created by cut
                 lower_poly, upper_poly = _get_new_polygons(poly, I1, I2)
                 next_point_set_polygons.append(lower_poly)
@@ -158,4 +158,4 @@ def get_iterative_hs_cuts(
             cut_segments[i].append(Line(p1=I1, p2=I2))
         point_sets = next_point_sets
         point_set_polygons = next_point_set_polygons
-    return cut_lines, cut_segments, points_on_cuts, error_occurred
+    return point_sets, cut_lines, cut_segments, points_on_cuts, error_occurred

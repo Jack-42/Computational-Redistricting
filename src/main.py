@@ -6,16 +6,16 @@ Description: Entry-point for code
 
 import argparse
 import logging
+import logging.config
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from ham_sandwich import get_ham_sandwich_cut
 from iterative_ham import get_iterative_hs_cuts
 from point_set import ColorPointSet
 from utils.constants import *
+from utils.region_stats import get_region_majorities
 from visualization import plot_k_cuts, plot_lines, plot_point_set
-from voronoi import get_voronoi_sample
 
 
 def list_of_int(arg):
@@ -78,7 +78,12 @@ def parse_args():
         "--k",
         type=int,
         default=1,
-        help="number of iterations to perform with iterative ham-sandwich algorithm",
+        help=f"({ITERATIVE_HAM_SANDWICH} only) number of iterations to perform",
+    )
+    parser.add_argument(
+        "--calculate_final_regions",
+        action="store_true",
+        help=f"({ITERATIVE_HAM_SANDWICH} only) calculate final regions formed by cuts and log their statistics",
     )
     args = parser.parse_args()
     return args
@@ -99,17 +104,23 @@ if __name__ == "__main__":
         plot_point_set(point_set, show=False, plot_bbox=True, hide_ticks=True)
         plot_lines(cuts, save_path=args.fig_save_path, show=args.show_fig)
     elif args.algorithm == ITERATIVE_HAM_SANDWICH:
-        cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(
-            point_set, args.k
+        regions, cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(
+            point_set, args.k, args.calculate_final_regions
         )
         if not err:
+            if args.calculate_final_regions:
+                exclude_weights = args.weight_method == BIASED_WEIGHT
+                majorities = get_region_majorities(
+                    point_set, points_on_cuts, regions, exclude_weights
+                )
+                print(f"Region majorities: {majorities}")
             # special_indices = points that were intersected by a cut
             # used to make these points less opaque for visualization purposes
-            special_indices = point_set.get_matching_indices(points_on_cuts)
+            intersected_points = point_set.get_matching_indices(points_on_cuts)
             plot_point_set(
                 point_set,
                 show=False,
-                special_indices=special_indices,
+                special_indices=intersected_points,
                 plot_bbox=True,
                 hide_ticks=True,
             )

@@ -25,7 +25,6 @@ class ColorPointSet:
         k: int = 1,
         spreads: np.ndarray = None,
         color_sets: Optional[dict] = None,
-        is_weight: Optional[np.ndarray] = None,
         defining_poly: Optional[Polygon] = None,
     ) -> None:
         self.lower_x = LOWER_X
@@ -34,7 +33,7 @@ class ColorPointSet:
         self.upper_y = UPPER_Y
 
         if color_sets is not None and defining_poly is not None:
-            self._alt_init(color_sets, defining_poly, is_weight)
+            self._alt_init(color_sets, defining_poly)
             return
 
         self.n_points = sum(points_per_color)
@@ -50,7 +49,7 @@ class ColorPointSet:
         # colors[i] = m indicates point (x[i], y[i]) is color m, m in [0, n_colors]
         self.unique_colors = np.arange(self.n_colors)
         self.colors = self._get_point_colors()
-        self.color_sets = self._get_color_sets()
+        self.color_sets, self.og_color_sets = self._get_color_sets()
         if weighting_method is not None and weighting_method == BIASED_WEIGHT:
             n_regions = 2**k
             self.weights = get_biased_weights_random(
@@ -64,14 +63,11 @@ class ColorPointSet:
             # TODO:
             raise NotImplementedError()
 
-    def _alt_init(
-        self, color_sets: dict, defining_poly: Polygon, is_weight: np.ndarray
-    ):
+    def _alt_init(self, color_sets: dict, defining_poly: Polygon):
         # don't need all attributes if using this initialization
         self.color_sets = color_sets
         self.n_colors = len(color_sets)
         self.n_points = sum([len(c_set) for c_set in color_sets.values()])
-        self.is_weight = is_weight
 
         # defining_poly contains all points, so can just these vertices to calculate bounds
         vertices = get_vertices(defining_poly)
@@ -85,21 +81,40 @@ class ColorPointSet:
         Used for helping visualize/set opacity of points on cut-line
         """
         indices = []
+        atol = 0.01
         for p in query_ps:
             for i, (x_val, y_val) in enumerate(zip(self.x, self.y)):
-                if np.isclose(p.x, x_val) and np.isclose(p.y, y_val):
+                if np.isclose(p.x, x_val, atol=atol) and np.isclose(p.y, y_val, atol):
                     indices.append(i)
         return np.array(indices)
+
+    def get_sub_color_set(self, cset_query: dict, use_og: bool):
+        csets = self.color_sets
+        if use_og:
+            csets = self.og_color_sets
+        final_set = {}
+        for color in self.unique_colors:
+            cset = csets[color]
+            query_cset = cset_query[color]
+            for p in query_cset:
+                # note the use of "is" - equality by reference
+                if any(p is p_prime for p_prime in cset):
+                    final_set[color] = final_set.get(color, []) + [p]
+        return final_set
 
     def _get_color_sets(self):
         # colors_lists[i] = (x[j], y[j]) where color[j]=i
         color_sets = {}
+        og_color_sets = {}
         for color in self.unique_colors:
-            color_sets[color] = xy_to_points(
-                self.x[self.colors == color], self.y[self.colors == color]
-            )
+            idx = self.colors == color
+            color_sets[color] = xy_to_points(self.x[idx], self.y[idx])
+            iws = self.is_weight[idx]
+            og_color_sets[color] = [
+                p for p, iw in zip(color_sets[color], iws) if not (iw)
+            ]
         self.color_sets = color_sets
-        return color_sets
+        return color_sets, og_color_sets
 
     def _get_sample_points(self) -> tuple[np.ndarray, np.ndarray]:
         if self.spatial_method == UNIFORM_RANDOM:
@@ -159,7 +174,7 @@ class ColorPointSet:
         self.points_per_color = np.zeros(len(unique))
         for u, c in zip(unique, counts):
             self.points_per_color[u] = c
-        self.color_sets = self._get_color_sets()
+        self.color_sets, self.og_color_sets = self._get_color_sets()
 
     def _random_colors(self) -> np.ndarray:
         # for random case this is overly complicated, but want code to be adapatable

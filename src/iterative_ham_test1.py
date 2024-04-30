@@ -33,7 +33,7 @@ for k in k_values:
 
         start_time = time.time()
         np.random.seed(42)
-        cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(point_set, k)
+        _, cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(point_set, k)
         end_time = time.time()
 
         execution_time = end_time - start_time
