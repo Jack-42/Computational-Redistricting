@@ -126,19 +126,28 @@ def get_rectangular_region(
     return poly
 
 
-def _on_line(p: Point, line: Line):
-    return np.isclose((p.x * line.slope + line.y_int), p.y)
+def _on_line(p: Point, line: Line, atol: float = 1e-8):
+    return np.isclose((p.x * line.slope + line.y_int), p.y, atol)
 
 
-def get_points_on_line(ps: list[Point], line: Line) -> list[Point]:
+def get_points_on_line(ps: list[Point], line: Line, atol: float = 1e-8) -> list[Point]:
     """
     Get the subset of points on the given line
     """
-    return [p for p in ps if _on_line(p, line)]
+    return [p for p in ps if _on_line(p, line, atol)]
+
+
+def get_points_near_cuts(points: list, cuts: list, atol: float):
+    # post-processing step needed for weighted case
+    points_near_cuts = []
+    for cut in cuts:
+        points_near_cut = get_points_on_line(points, cut, atol)
+        points_near_cuts.extend(points_near_cut)
+    return points_near_cuts
 
 
 def xy_to_points(x: np.ndarray, y: np.ndarray) -> list[Point]:
-    return list(map(lambda coords: Point(*coords), zip(x, y)))
+    return np.array(list(map(lambda coords: Point(*coords), zip(x, y))))
 
 
 def clockwise_compare(p1: Point, p2: Point, center: Point) -> int:

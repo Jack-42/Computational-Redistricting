@@ -14,6 +14,7 @@ from ham_sandwich import get_ham_sandwich_cut
 from iterative_ham import get_iterative_hs_cuts
 from point_set import ColorPointSet
 from utils.constants import *
+from utils.geometry import get_points_near_cuts
 from utils.region_stats import get_region_majorities
 from visualization import plot_k_cuts, plot_lines, plot_point_set
 
@@ -107,6 +108,17 @@ if __name__ == "__main__":
         regions, cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(
             point_set, args.k, args.calculate_final_regions
         )
+        # if using weighted case, then consider all points close to a cut to be on the cut
+        cut_tol = 0.01  # NOTE: if there is a point within cut_tol of two cuts this will cause an error
+        if args.weight_method == BIASED_WEIGHT:
+            # gather together all points that were part of cut
+            # NOTE: args.weight_method == BIASED_WEIGHT => only majority points are weighted
+            majority_i = np.argmax(args.points_per_color)
+            points_near_cuts = get_points_near_cuts(
+                point_set.color_sets[majority_i], cuts, cut_tol
+            )
+            points_on_cuts.extend(points_near_cuts)
+            points_on_cuts = list(set(points_on_cuts))
         if not err:
             if args.calculate_final_regions:
                 exclude_weights = args.weight_method == BIASED_WEIGHT
@@ -123,6 +135,7 @@ if __name__ == "__main__":
                 special_indices=intersected_points,
                 plot_bbox=True,
                 hide_ticks=True,
+                hide_weighted_pts=True,
             )
             plot_k_cuts(
                 cut_segments,

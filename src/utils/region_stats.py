@@ -6,16 +6,25 @@ Code for calculating statistics of regions.
 """
 
 
+def get_sub_color_set(cset: dict, cset_query: dict, exclude_pts: list):
+    final_set = {}
+    for color in cset.keys():
+        sub_cset = cset[color]
+        sub_query_cset = cset_query[color]
+        for p in sub_query_cset:
+            if any(
+                p.equals_exact(p_prime, tolerance=1e-8) for p_prime in sub_cset
+            ) and not (
+                any(p.equals_exact(p_prime, tolerance=1e-8) for p_prime in exclude_pts)
+            ):
+                final_set[color] = final_set.get(color, []) + [p]
+    return final_set
+
+
 def get_original_pts(og_point_set, color_sets: dict, points_on_cuts=None):
-    og_cset = og_point_set.get_sub_color_set(color_sets, use_og=True)
-    if points_on_cuts is not None:
-        og = og_cset.copy()
-        og_cset = {}
-        for color, cset in og.items():
-            for p in cset:
-                for p_prime in points_on_cuts:
-                    if not (p.almost_equals(p_prime, decimal=2)):
-                        og_cset[color] = og_cset.get(color, []) + [p]
+    if points_on_cuts is None:
+        points_on_cuts = []
+    og_cset = get_sub_color_set(og_point_set.og_color_sets, color_sets, points_on_cuts)
     return og_cset
 
 
@@ -24,11 +33,9 @@ def get_majority_color(og_point_set, points_on_cuts, point_set, exclude_weights:
     if exclude_weights:
         cset = get_original_pts(og_point_set, cset, points_on_cuts)
     color_sizes = {k: len(cset[k]) for k in cset}
-
     first_majority = max(color_sizes, key=color_sizes.get)
     # check for tie
     first_size = color_sizes[first_majority]
-    print(color_sizes)
     color_sizes[first_majority] = -1
     second_majority = max(color_sizes, key=color_sizes.get)
     if first_size == color_sizes[second_majority]:
