@@ -11,7 +11,7 @@ import numpy as np
 from shapely import Polygon
 
 from utils.constants import *
-from utils.geometry import get_vertices, xy_to_points
+from utils.geometry import get_rectangular_region, get_vertices, xy_to_points
 from utils.weighting import get_biased_weights_random
 
 
@@ -19,13 +19,11 @@ class ColorPointSet:
     def __init__(
         self,
         points_per_color: list[int] = None,
-        spatial_method: str = None,
         color_method: str = None,
         weighting_method: str = None,
         k: int = 1,
         spreads: np.ndarray = None,
         color_sets: Optional[dict] = None,
-        is_weight: Optional[np.ndarray] = None,
         defining_poly: Optional[Polygon] = None,
     ) -> None:
         self.lower_x = LOWER_X
@@ -34,11 +32,10 @@ class ColorPointSet:
         self.upper_y = UPPER_Y
 
         if color_sets is not None and defining_poly is not None:
-            self._alt_init(color_sets, defining_poly, is_weight)
+            self._alt_init(color_sets, defining_poly)
             return
 
         self.n_points = sum(points_per_color)
-        self.spatial_method = spatial_method
         self.color_method = color_method
         self.n_colors = len(points_per_color)
         self.points_per_color = points_per_color
@@ -50,8 +47,10 @@ class ColorPointSet:
         # colors[i] = m indicates point (x[i], y[i]) is color m, m in [0, n_colors]
         self.unique_colors = np.arange(self.n_colors)
         self.colors = self._get_point_colors()
+        self.points = xy_to_points(self.x, self.y)
         self.color_sets = self._get_color_sets()
-        if weighting_method is not None and weighting_method == BIASED_WEIGHT:
+        self.og_color_sets = self.color_sets
+        if weighting_method is not None and weighting_method == WEIGHT_MAJORITY:
             n_regions = 2**k
             self.weights = get_biased_weights_random(
                 self.colors, points_per_color, n_regions
@@ -60,18 +59,15 @@ class ColorPointSet:
             spreads = [0.01] * len(self.weights)
             self.spreads = np.array(spreads)
             self._cluster()
-        elif weighting_method is not None and weighting_method == POPULATION_WEIGHT:
+        elif weighting_method is not None and weighting_method == WEIGHT_POPULATION:
             # TODO:
             raise NotImplementedError()
 
-    def _alt_init(
-        self, color_sets: dict, defining_poly: Polygon, is_weight: np.ndarray
-    ):
+    def _alt_init(self, color_sets: dict, defining_poly: Polygon):
         # don't need all attributes if using this initialization
         self.color_sets = color_sets
         self.n_colors = len(color_sets)
         self.n_points = sum([len(c_set) for c_set in color_sets.values()])
-        self.is_weight = is_weight
 
         # defining_poly contains all points, so can just these vertices to calculate bounds
         vertices = get_vertices(defining_poly)
@@ -80,14 +76,16 @@ class ColorPointSet:
         self.lower_y = min(vertices, key=lambda p: p.y).y
         self.upper_y = max(vertices, key=lambda p: p.y).y
 
-    def get_matching_indices(self, query_ps: list) -> np.ndarray:
+    def get_matching_indices(self, query_ps: list, atol: float = 1e-8) -> np.ndarray:
         """
         Used for helping visualize/set opacity of points on cut-line
         """
         indices = []
         for p in query_ps:
             for i, (x_val, y_val) in enumerate(zip(self.x, self.y)):
-                if np.isclose(p.x, x_val) and np.isclose(p.y, y_val):
+                if np.isclose(p.x, x_val, atol=atol) and np.isclose(
+                    p.y, y_val, atol=atol
+                ):
                     indices.append(i)
         return np.array(indices)
 
@@ -95,19 +93,10 @@ class ColorPointSet:
         # colors_lists[i] = (x[j], y[j]) where color[j]=i
         color_sets = {}
         for color in self.unique_colors:
-            color_sets[color] = xy_to_points(
-                self.x[self.colors == color], self.y[self.colors == color]
-            )
+            idx = self.colors == color
+            color_sets[color] = xy_to_points(self.x[idx], self.y[idx])
         self.color_sets = color_sets
         return color_sets
-
-    def _get_sample_points(self) -> tuple[np.ndarray, np.ndarray]:
-        if self.spatial_method == UNIFORM_RANDOM:
-            return self._uniform_random()
-        else:
-            raise NotImplementedError(
-                f"Given spatial_method not supported: {self.spatial_method}"
-            )
 
     def _get_point_colors(self) -> np.ndarray:
         if self.color_method == RANDOM:
@@ -132,6 +121,10 @@ class ColorPointSet:
         new_x = np.empty(np.sum(w))
         new_y = np.empty(np.sum(w))
         new_colors = np.empty(np.sum(w), dtype=int)
+        self.weighted_to_og = {}  # maps weighted points to their original point
+        self.og_to_weighted = {}  # maps original points to their weighted points
+
+        j_offset = self.n_points
 
         j = 0
         for i, (xi, yi, wi, di) in enumerate(zip(x, y, w, d)):
@@ -147,6 +140,9 @@ class ColorPointSet:
                 new_y[j] = y_new
                 new_colors[j] = colors[i]
 
+                self.og_to_weighted[i] = self.og_to_weighted.get(i, []) + [j_offset + j]
+                self.weighted_to_og[j_offset + j] = i
+
                 j += 1
 
         new_is_weight = np.ones(len(new_colors), dtype="bool")
@@ -154,6 +150,7 @@ class ColorPointSet:
         self.colors = np.append(self.colors, new_colors)
         self.x = np.append(self.x, new_x)
         self.y = np.append(self.y, new_y)
+        self.points = xy_to_points(self.x, self.y)
         self.n_points = len(x)
         unique, counts = np.unique(self.colors, return_counts=True)
         self.points_per_color = np.zeros(len(unique))
@@ -173,3 +170,29 @@ class ColorPointSet:
 
     def __len__(self):
         return self.n_points
+
+
+def subsample(point_set: ColorPointSet, ratio: float):
+    """
+    Return subset of ColorPointSet by sampling ratio * (n_points) points from point_set.
+    Will sample from color_sets to (approximately) preserve the ratio of points per color.
+    """
+    sub_n_points = np.floor(point_set.n_points * ratio)
+    sub_points_per_color = list(
+        map(lambda n: int(np.floor(ratio * n)), point_set.points_per_color)
+    )
+    remainder = sub_n_points - np.sum(sub_points_per_color)
+    for i in range(int(remainder)):
+        sub_points_per_color[i] += 1
+
+    # don't need to calculate new lower_x, upper_x, etc
+    sub_bounding_poly = get_rectangular_region(
+        point_set.lower_x, point_set.upper_x, point_set.lower_y, point_set.upper_y
+    )
+    sub_cset = {}
+    for color in point_set.color_sets:
+        sub_cset[color] = np.random.choice(
+            point_set.color_sets[color], size=sub_points_per_color[color], replace=False
+        )
+    sub_point_set = ColorPointSet(color_sets=sub_cset, defining_poly=sub_bounding_poly)
+    return sub_point_set

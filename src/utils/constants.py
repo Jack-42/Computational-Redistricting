@@ -6,22 +6,20 @@ Description: Contains constant values used throughout project
 
 import numpy as np
 
-# algorithm options
+# program options
 HAM_SANDWICH = "ham_sandwich"
 ITERATIVE_HAM_SANDWICH = "iterative_ham_sandwich"
 VISUALIZE_POINTS = "visualize_points"
-VORONOI_SAMPLING = "voronoi_sampling"
-
-# sampling methods
-UNIFORM_RANDOM = "uni_random"
 
 # color sampling methods
 RANDOM = "random"
 
 # weighting
-UNIFORM_WEIGHT = "uni_weight"  # all weights the same
-BIASED_WEIGHT = "bias_weight"  # bias weights to try to make regions more "fair"
-POPULATION_WEIGHT = "population_weight"  # treat given points as population centers and sample around them
+WEIGHT_UNIFORM = "uniform"  # all weights the same
+WEIGHT_MAJORITY = "majority"  # increase weight on subset of majority points to try to make regions more "fair"
+WEIGHT_POPULATION = (
+    "population"  # treat given points as population centers and sample around them
+)
 
 # math
 EPSILON = np.finfo(np.float64).eps
