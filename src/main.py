@@ -40,10 +40,10 @@ def parse_args():
         help="number of points to use for each color",
     )
     parser.add_argument(
-        "--algorithm",
+        "--program",
         type=str,
         default=HAM_SANDWICH,
-        help="algorithm to visualize",
+        help=f"program to visualize, choose from: {HAM_SANDWICH, ITERATIVE_HAM_SANDWICH, VISUALIZE_POINTS}",
     )
     parser.add_argument(
         "--sample_method",
@@ -54,8 +54,8 @@ def parse_args():
     parser.add_argument(
         "--weight_method",
         type=str,
-        default=UNIFORM_WEIGHT,
-        help=f"how to weight points, choose from: {UNIFORM_WEIGHT, BIASED_WEIGHT}",
+        default=WEIGHT_UNIFORM,
+        help=f"how to weight points, choose from: {WEIGHT_UNIFORM, WEIGHT_MAJORITY}",
     )
     parser.add_argument(
         "--color_method",
@@ -100,17 +100,17 @@ if __name__ == "__main__":
         weighting_method=args.weight_method,
         k=args.k,
     )
-    if args.algorithm == HAM_SANDWICH:
+    if args.program == HAM_SANDWICH:
         cuts = get_ham_sandwich_cut(point_set)
         plot_point_set(point_set, show=False, plot_bbox=True, hide_ticks=True)
         plot_lines(cuts, save_path=args.fig_save_path, show=args.show_fig)
-    elif args.algorithm == ITERATIVE_HAM_SANDWICH:
+    elif args.program == ITERATIVE_HAM_SANDWICH:
         regions, cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(
             point_set, args.k, args.calculate_final_regions
         )
         # if using weighted case, then consider all points close to a cut to be on the cut
         cut_tol = 0.01  # NOTE: if there is a point within cut_tol of two cuts this will cause an error
-        if args.weight_method == BIASED_WEIGHT:
+        if args.weight_method == WEIGHT_MAJORITY:
             # gather together all points that were part of cut
             # NOTE: args.weight_method == BIASED_WEIGHT => only majority points are weighted
             majority_i = np.argmax(args.points_per_color)
@@ -121,7 +121,7 @@ if __name__ == "__main__":
             points_on_cuts = list(set(points_on_cuts))
         if not err:
             if args.calculate_final_regions:
-                exclude_weights = args.weight_method == BIASED_WEIGHT
+                exclude_weights = args.weight_method == WEIGHT_MAJORITY
                 majorities = get_region_majorities(
                     point_set, points_on_cuts, regions, exclude_weights
                 )
@@ -148,12 +148,12 @@ if __name__ == "__main__":
             logging.error(
                 "An error occured, please check the message above and/or your input points"
             )
-    elif args.algorithm == VISUALIZE_POINTS:
+    elif args.program == VISUALIZE_POINTS:
         plot_point_set(point_set, save_path=args.fig_save_path)
-    # elif args.algorithm == VORONOI_SAMPLING:
+    # elif args.program == VORONOI_SAMPLING:
     # (sampled_points, voronoi) = get_voronoi_sample(point_set)
     # plot_point_set(sampled_points, show=False)
     # plot_lines(voronoi, save_path=args.fig_save_path, show=args.show_fig)
 
     else:
-        raise NotImplementedError(f"Given algorithm not implemented: {args.algorithm}")
+        raise NotImplementedError(f"Given program not implemented: {args.program}")

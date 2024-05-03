@@ -40,43 +40,45 @@ def _get_new_polygons(
         tmp = idx_1
         idx_1 = idx_2
         idx_2 = tmp
-    lower_points = new_points[0 : idx_1 + 1] + new_points[idx_2:]
-    upper_points = new_points[idx_1 : idx_2 + 1]
-    lower_poly = get_polygon(lower_points)
-    upper_poly = get_polygon(upper_points)
-    return lower_poly, upper_poly
+    first_points = new_points[0 : idx_1 + 1] + new_points[idx_2:]
+    second_points = new_points[idx_1 : idx_2 + 1]
+    first_poly = get_polygon(first_points)
+    second_poly = get_polygon(second_points)
+    return first_poly, second_poly
 
 
 def _get_new_point_sets(
     cut: Line,
     point_set: ColorPointSet,
-    lower_poly: Polygon,
-    upper_poly: Polygon,
+    first_poly: Polygon,
+    second_poly: Polygon,
     points_on_cuts: list,
 ):
-    lower_color_set = {}
-    upper_color_set = {}
+    first_color_set = {}
+    second_color_set = {}
     for c in point_set.color_sets:
         c_points = point_set.color_sets[c]
         c_points_on_cut = get_points_on_line(c_points, cut)
-        c_points_in_lower = get_points_inside(c_points, lower_poly)
-        c_points_in_upper = get_points_inside(c_points, upper_poly)
+        c_points_in_first = get_points_inside(c_points, first_poly)
+        c_points_in_second = get_points_inside(c_points, second_poly)
 
         n_cut = len(c_points_on_cut)
-        if n_cut > 0 and c_points_on_cut[0] in c_points_in_lower:
-            c_points_in_lower.remove(c_points_on_cut[0])
-        if n_cut > 0 and c_points_on_cut[0] in c_points_in_upper:
-            c_points_in_upper.remove(c_points_on_cut[0])
+        if n_cut > 0 and c_points_on_cut[0] in c_points_in_first:
+            c_points_in_first.remove(c_points_on_cut[0])
+        if n_cut > 0 and c_points_on_cut[0] in c_points_in_second:
+            c_points_in_second.remove(c_points_on_cut[0])
         if n_cut > 0:
             # for visualization purposes later
             points_on_cuts.extend(c_points_on_cut)
 
-        lower_color_set[c] = c_points_in_lower
-        upper_color_set[c] = c_points_in_upper
+        first_color_set[c] = c_points_in_first
+        second_color_set[c] = c_points_in_second
 
-    new_p_s_lower = ColorPointSet(color_sets=lower_color_set, defining_poly=lower_poly)
-    new_p_s_upper = ColorPointSet(color_sets=upper_color_set, defining_poly=upper_poly)
-    return new_p_s_lower, new_p_s_upper
+    new_p_s_first = ColorPointSet(color_sets=first_color_set, defining_poly=first_poly)
+    new_p_s_second = ColorPointSet(
+        color_sets=second_color_set, defining_poly=second_poly
+    )
+    return new_p_s_first, new_p_s_second
 
 
 def _sanity_check_points(p_s: ColorPointSet, i: int, k: int):
@@ -137,16 +139,16 @@ def get_iterative_hs_cuts(
             I1, I2 = get_line_poly_intersection(hs_line, poly)
             if i < (k - 1) or calculate_final_regions:
                 # calculate new intersections and regions created by cut
-                lower_poly, upper_poly = _get_new_polygons(poly, I1, I2)
-                next_point_set_polygons.append(lower_poly)
-                next_point_set_polygons.append(upper_poly)
+                first_poly, second_poly = _get_new_polygons(poly, I1, I2)
+                next_point_set_polygons.append(first_poly)
+                next_point_set_polygons.append(second_poly)
 
                 # use polygons to determine next point sets
-                new_p_s_lower, new_p_s_upper = _get_new_point_sets(
-                    hs_line, p_s, lower_poly, upper_poly, points_on_cuts
+                new_p_s_first, new_p_s_second = _get_new_point_sets(
+                    hs_line, p_s, first_poly, second_poly, points_on_cuts
                 )
-                next_point_sets.append(new_p_s_lower)
-                next_point_sets.append(new_p_s_upper)
+                next_point_sets.append(new_p_s_first)
+                next_point_sets.append(new_p_s_second)
             else:
                 # still get points that were on cut for visualization
                 c1_on_cut = get_points_on_line(p_s.color_sets[0], hs_line)

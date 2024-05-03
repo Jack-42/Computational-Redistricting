@@ -52,7 +52,7 @@ class ColorPointSet:
         self.points = xy_to_points(self.x, self.y)
         self.color_sets = self._get_color_sets()
         self.og_color_sets = self.color_sets
-        if weighting_method is not None and weighting_method == BIASED_WEIGHT:
+        if weighting_method is not None and weighting_method == WEIGHT_MAJORITY:
             n_regions = 2**k
             self.weights = get_biased_weights_random(
                 self.colors, points_per_color, n_regions
@@ -61,7 +61,7 @@ class ColorPointSet:
             spreads = [0.01] * len(self.weights)
             self.spreads = np.array(spreads)
             self._cluster()
-        elif weighting_method is not None and weighting_method == POPULATION_WEIGHT:
+        elif weighting_method is not None and weighting_method == WEIGHT_POPULATION:
             # TODO:
             raise NotImplementedError()
 
