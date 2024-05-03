@@ -6,6 +6,7 @@ Algorithm for performing iterative ham-sandwich cuts
 """
 
 import logging
+from typing import Optional
 
 from shapely import Point, Polygon
 
@@ -104,10 +105,13 @@ def _sanity_check_kth_cut(k_cuts: list, p_s: ColorPointSet, i: int) -> bool:
 
 
 def get_iterative_hs_cuts(
-    point_set: ColorPointSet, k: int, calculate_final_regions: bool
+    point_set: ColorPointSet,
+    k: int,
+    calculate_final_regions: bool,
+    full_point_set: Optional[ColorPointSet] = None,
 ) -> tuple[list[Line], list[Line]]:
     """
-    Perform k-rounds of ham-sandwich cuts
+    Perform k-rounds of ham-sandwich cuts. full_point_set should be provided if using a subsample for point_set
     """
     point_sets = [point_set]
     # rectangle bounding initial region
@@ -144,6 +148,8 @@ def get_iterative_hs_cuts(
                 next_point_set_polygons.append(second_poly)
 
                 # use polygons to determine next point sets
+                if i == (k - 1) and full_point_set is not None:
+                    p_s = full_point_set
                 new_p_s_first, new_p_s_second = _get_new_point_sets(
                     hs_line, p_s, first_poly, second_poly, points_on_cuts
                 )

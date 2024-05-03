@@ -11,7 +11,7 @@ import numpy as np
 from shapely import Polygon
 
 from utils.constants import *
-from utils.geometry import get_vertices, xy_to_points
+from utils.geometry import get_rectangular_region, get_vertices, xy_to_points
 from utils.weighting import get_biased_weights_random
 
 
@@ -180,3 +180,29 @@ class ColorPointSet:
 
     def __len__(self):
         return self.n_points
+
+
+def subsample(point_set: ColorPointSet, ratio: float):
+    """
+    Return subset of ColorPointSet by sampling ratio * (n_points) points from point_set.
+    Will sample from color_sets to (approximately) preserve the ratio of points per color.
+    """
+    sub_n_points = np.floor(point_set.n_points * ratio)
+    sub_points_per_color = list(
+        map(lambda n: int(np.floor(ratio * n)), point_set.points_per_color)
+    )
+    remainder = sub_n_points - np.sum(sub_points_per_color)
+    for i in range(int(remainder)):
+        sub_points_per_color[i] += 1
+
+    # don't need to calculate new lower_x, upper_x, etc
+    sub_bounding_poly = get_rectangular_region(
+        point_set.lower_x, point_set.upper_x, point_set.lower_y, point_set.upper_y
+    )
+    sub_cset = {}
+    for color in point_set.color_sets:
+        sub_cset[color] = np.random.choice(
+            point_set.color_sets[color], size=sub_points_per_color[color], replace=False
+        )
+    sub_point_set = ColorPointSet(color_sets=sub_cset, defining_poly=sub_bounding_poly)
+    return sub_point_set

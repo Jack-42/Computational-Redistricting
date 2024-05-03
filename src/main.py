@@ -12,7 +12,7 @@ import numpy as np
 
 from ham_sandwich import get_ham_sandwich_cut
 from iterative_ham import get_iterative_hs_cuts
-from point_set import ColorPointSet
+from point_set import ColorPointSet, subsample
 from utils.constants import *
 from utils.geometry import get_points_near_cuts
 from utils.region_stats import get_region_majorities
@@ -86,6 +86,17 @@ def parse_args():
         action="store_true",
         help=f"({ITERATIVE_HAM_SANDWICH} only) calculate final regions formed by cuts and log their statistics",
     )
+    parser.add_argument(
+        "--subsample_points",
+        action="store_true",
+        help="subsample the original set of points before performing HSC",
+    )
+    parser.add_argument(
+        "--subsample_ratio",
+        type=float,
+        default=0.1,
+        help="ratio of points to sample, will sample floor(n_points * ratio) total points",
+    )
     args = parser.parse_args()
     return args
 
@@ -100,13 +111,21 @@ if __name__ == "__main__":
         weighting_method=args.weight_method,
         k=args.k,
     )
+    og_point_set = None
+    if args.subsample_points:
+        sub_point_set = subsample(point_set, args.subsample_ratio)
+        # will swap back to original set for visualization
+        og_point_set = point_set
+        point_set = sub_point_set
     if args.program == HAM_SANDWICH:
         cuts = get_ham_sandwich_cut(point_set)
+        if args.subsample_points:
+            point_set = og_point_set
         plot_point_set(point_set, show=False, plot_bbox=True, hide_ticks=True)
         plot_lines(cuts, save_path=args.fig_save_path, show=args.show_fig)
     elif args.program == ITERATIVE_HAM_SANDWICH:
         regions, cuts, cut_segments, points_on_cuts, err = get_iterative_hs_cuts(
-            point_set, args.k, args.calculate_final_regions
+            point_set, args.k, args.calculate_final_regions, og_point_set
         )
         # if using weighted case, then consider all points close to a cut to be on the cut
         cut_tol = 0.01  # NOTE: if there is a point within cut_tol of two cuts this will cause an error
@@ -120,6 +139,8 @@ if __name__ == "__main__":
             points_on_cuts.extend(points_near_cuts)
             points_on_cuts = list(set(points_on_cuts))
         if not err:
+            if args.subsample_points:
+                point_set = og_point_set
             if args.calculate_final_regions:
                 exclude_weights = args.weight_method == WEIGHT_MAJORITY
                 majorities = get_region_majorities(
