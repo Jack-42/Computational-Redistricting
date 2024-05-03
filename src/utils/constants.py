@@ -11,9 +11,6 @@ HAM_SANDWICH = "ham_sandwich"
 ITERATIVE_HAM_SANDWICH = "iterative_ham_sandwich"
 VISUALIZE_POINTS = "visualize_points"
 
-# sampling methods
-UNIFORM_RANDOM = "uniform_random"
-
 # color sampling methods
 RANDOM = "random"
 

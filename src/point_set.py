@@ -19,7 +19,6 @@ class ColorPointSet:
     def __init__(
         self,
         points_per_color: list[int] = None,
-        spatial_method: str = None,
         color_method: str = None,
         weighting_method: str = None,
         k: int = 1,
@@ -37,7 +36,6 @@ class ColorPointSet:
             return
 
         self.n_points = sum(points_per_color)
-        self.spatial_method = spatial_method
         self.color_method = color_method
         self.n_colors = len(points_per_color)
         self.points_per_color = points_per_color
@@ -99,14 +97,6 @@ class ColorPointSet:
             color_sets[color] = xy_to_points(self.x[idx], self.y[idx])
         self.color_sets = color_sets
         return color_sets
-
-    def _get_sample_points(self) -> tuple[np.ndarray, np.ndarray]:
-        if self.spatial_method == UNIFORM_RANDOM:
-            return self._uniform_random()
-        else:
-            raise NotImplementedError(
-                f"Given spatial_method not supported: {self.spatial_method}"
-            )
 
     def _get_point_colors(self) -> np.ndarray:
         if self.color_method == RANDOM:

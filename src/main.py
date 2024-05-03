@@ -46,12 +46,6 @@ def parse_args():
         help=f"program to visualize, choose from: {HAM_SANDWICH, ITERATIVE_HAM_SANDWICH, VISUALIZE_POINTS}",
     )
     parser.add_argument(
-        "--sample_method",
-        type=str,
-        default=UNIFORM_RANDOM,
-        help=f"method for sampling spatial points, choose from: {UNIFORM_RANDOM}",
-    )
-    parser.add_argument(
         "--weight_method",
         type=str,
         default=WEIGHT_UNIFORM,
@@ -106,7 +100,6 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     point_set = ColorPointSet(
         points_per_color=args.points_per_color,
-        spatial_method=args.sample_method,
         color_method=args.color_method,
         weighting_method=args.weight_method,
         k=args.k,
