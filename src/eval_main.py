@@ -139,7 +139,7 @@ def subsample_main(
     ppcs: list[list[int]],
 ):
     # subsampling
-    subsample_ratios = [0.05, 0.1, 0.2, 0.4]
+    subsample_ratios = [0.1, 0.2, 0.4]
 
     print("Running evaluation...")
     rows = evaluate_params(k_vals, ppcs, seeds, True, subsample_ratios, WEIGHT_UNIFORM)
