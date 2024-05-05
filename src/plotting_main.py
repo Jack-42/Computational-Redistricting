@@ -73,6 +73,9 @@ if __name__ == "__main__":
     df["color_ratio"] = df["points_per_color"].map(
         lambda ppc: ppc[0] / (ppc[0] + ppc[1])
     )  # ppc[0] assumed to be minority color
+    df["majority_share_dist_from_ideal"] = df["majority_share"] - (
+        1 - df["color_ratio"]
+    )
     os.makedirs(args.save_dir, exist_ok=True)
     plot_grouping(
         df,
@@ -80,13 +83,21 @@ if __name__ == "__main__":
         "majority_share",
         os.path.join(args.save_dir, "color_ratio.png"),
     )
-    plot_grouping(df, "k", "majority_share", os.path.join(args.save_dir, "k.png"))
+    plot_grouping(
+        df,
+        "color_ratio",
+        "majority_share_dist_from_ideal",
+        os.path.join(args.save_dir, "color_ratio_dist.png"),
+    )
+    plot_grouping(
+        df, "k", "majority_share_dist_from_ideal", os.path.join(args.save_dir, "k.png")
+    )
 
     sub_df = df[df["use_subsampling"]]
     if len(sub_df) > 0:
         plot_grouping(
             df,
             "subsample_ratio",
-            "majority_share",
+            "majority_share_dist_from_ideal",
             os.path.join(args.save_dir, "sub_ratio.png"),
         )
